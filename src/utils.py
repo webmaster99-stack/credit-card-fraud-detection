@@ -7,7 +7,7 @@ from sklearn.base import BaseEstimator
 from sklearn.metrics import f1_score, average_precision_score, roc_auc_score, ConfusionMatrixDisplay, RocCurveDisplay
 
 
-def plot_label_distribution(target_labels: pd.Series[Any], title: str):
+def plot_label_distribution(target_labels: pd.Series, title: str):
     """
     Plot a bar plot of class labels distribution
 
