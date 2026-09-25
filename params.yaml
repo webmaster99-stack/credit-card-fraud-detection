@@ -15,3 +15,20 @@ split:
 
 mlflow:
   experiment_name: fraud-detection
+
+ingest:
+  kaggle_dataset: kartik2112/fraud-detection
+  expected_files:
+    - fraudTrain.csv
+    - fraudTest.csv
+
+clean:
+  # Salt for the card_id hash. Not a secret: Sparkov is simulated, and the hash only keeps the
+  # raw card number out of every downstream table.
+  card_id_salt: sparkov-v1
+  card_id_length: 16
+  # Direct identifiers removed from the data. cc_num is replaced by card_id, not simply dropped.
+  identifier_columns: [first, last, street, trans_num]
+  # Redundant or misleading. unix_time is the timestamp shifted back exactly 7 years.
+  redundant_columns: ["Unnamed: 0", unix_time]
+  merchant_prefix: "fraud_"

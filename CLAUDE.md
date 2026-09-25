@@ -48,7 +48,7 @@ This is a portfolio project, built to the standard of a system that could suppor
 
 ## Common commands
 
-**Planned, not yet working:** none of these entry points exist until Phase 0 creates `pyproject.toml`, `dvc.yaml` and the rest. Treat this list as the target.
+**Working now:** `uv sync`, `dvc pull`/`dvc push`, `dvc repro` (ingest, clean, split), `pytest`, `ruff`, `mypy`, `pre-commit`. **Planned, not yet working:** the `uvicorn` and Gradio entry points (Phases 4-5). Run `dvc` through `uv run dvc ...` unless the venv is activated. `dvc repro ingest` needs a Kaggle token (`KAGGLE_API_TOKEN` or `KAGGLE_ACCESS_TOKEN` in `.env`).
 
 ```bash
 uv sync                      # install locked dependencies
@@ -161,7 +161,7 @@ The API returns the model version and pipeline version with every prediction, so
 
 ## Current status
 
-- Current phase: **Phase 1 — Data ingestion, versioning and EDA** (not started; see `docs/plan.md`)
+- Current phase: **Phase 1 — Data ingestion, versioning and EDA** (implemented locally; waiting on `dvc push`, git push, README and the `v0.1-eda` tag; see `docs/plan.md`)
 - Last completed tag: `v0.0-setup` (Phase 0)
 
 Update this section as work progresses.

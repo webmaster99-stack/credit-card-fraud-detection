@@ -1,0 +1,85 @@
+schema: '2.0'
+stages:
+  ingest:
+    cmd: python -m fraud.data.ingest
+    params:
+      params.yaml:
+        ingest:
+          kaggle_dataset: kartik2112/fraud-detection
+          expected_files:
+          - fraudTrain.csv
+          - fraudTest.csv
+    outs:
+    - path: data/raw/sparkov
+      hash: md5
+      md5: 472729bc96a7b8dfec5c01ebd5679815.dir
+      size: 501592535
+      nfiles: 2
+  clean:
+    cmd: python -m fraud.data.clean
+    deps:
+    - path: data/raw/sparkov
+      hash: md5
+      md5: 472729bc96a7b8dfec5c01ebd5679815.dir
+      size: 501592535
+      nfiles: 2
+    - path: src/fraud/data/clean.py
+      hash: md5
+      md5: 061117a94d3e2bd084fe430b722e8796
+      size: 1818
+    - path: src/fraud/data/schemas.py
+      hash: md5
+      md5: 471d5624aeb8cace2431151a2ea37b87
+      size: 1851
+    params:
+      params.yaml:
+        clean:
+          card_id_salt: sparkov-v1
+          card_id_length: 16
+          identifier_columns:
+          - first
+          - last
+          - street
+          - trans_num
+          redundant_columns:
+          - 'Unnamed: 0'
+          - unix_time
+          merchant_prefix: fraud_
+        ingest.expected_files:
+        - fraudTrain.csv
+        - fraudTest.csv
+    outs:
+    - path: data/interim/transactions.parquet
+      hash: md5
+      md5: 794f22e36f283b6abf3438070e1445ce
+      size: 70760800
+  split:
+    cmd: python -m fraud.data.split
+    deps:
+    - path: data/interim/transactions.parquet
+      hash: md5
+      md5: 794f22e36f283b6abf3438070e1445ce
+      size: 70760800
+    - path: src/fraud/data/split.py
+      hash: md5
+      md5: 9da5b325c0d4f076c8b8f3062b5c5c68
+      size: 3038
+    params:
+      params.yaml:
+        split:
+          train_start: '2019-01-01'
+          train_end: '2020-06-30'
+          valid_start: '2020-07-01'
+          valid_end: '2020-09-30'
+          test_start: '2020-10-01'
+          test_end: '2020-12-31'
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: a03532b1de5c77f62c501042f7ce782e.dir
+      size: 72686995
+      nfiles: 3
+    - path: reports/split_summary.json
+      hash: md5
+      md5: 803bacc765e232acfb88916752826dc5
+      size: 583

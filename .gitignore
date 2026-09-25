@@ -18,10 +18,8 @@ dist/
 .ipynb_checkpoints/
 
 # Data and model binaries (tracked by DVC, never git)
-/data/raw/*
-/data/interim/*
-/data/processed/*
-!/data/*/.gitkeep
+/data/**/*.csv
+/data/**/*.parquet
 *.pkl
 *.joblib
 *.onnx

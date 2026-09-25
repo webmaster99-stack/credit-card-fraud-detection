@@ -25,11 +25,11 @@ Time-based splits are required because in production the model scores the future
 
 **Tasks**
 
-- [ ] `ingest`, `clean`, `split` stages implemented and wired in `dvc.yaml`
-- [ ] Pandera schema for the cleaned table, with tests
-- [ ] EDA notebook with written conclusions
-- [ ] Data card `docs/data_cards/sparkov.md`
-- [ ] ADRs: "why Sparkov", "why time-based split"
+- [x] `ingest`, `clean`, `split` stages implemented and wired in `dvc.yaml`
+- [x] Pandera schema for the cleaned table, with tests
+- [x] EDA notebook with written conclusions
+- [x] Data card `docs/data_cards/sparkov.md`
+- [x] ADRs: "why Sparkov", "why time-based split"
 - [ ] README updated; tag `v0.1-eda`
 
 ## Phase 2 — Feature engineering pipeline

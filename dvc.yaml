@@ -1,0 +1,30 @@
+stages:
+  ingest:
+    cmd: python -m fraud.data.ingest
+    params:
+      - ingest
+    outs:
+      - data/raw/sparkov
+  clean:
+    cmd: python -m fraud.data.clean
+    deps:
+      - data/raw/sparkov
+      - src/fraud/data/clean.py
+      - src/fraud/data/schemas.py
+    params:
+      - ingest.expected_files
+      - clean
+    outs:
+      - data/interim/transactions.parquet
+  split:
+    cmd: python -m fraud.data.split
+    deps:
+      - data/interim/transactions.parquet
+      - src/fraud/data/split.py
+    params:
+      - split
+    outs:
+      - data/processed
+    metrics:
+      - reports/split_summary.json:
+          cache: false
