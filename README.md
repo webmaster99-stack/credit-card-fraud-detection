@@ -4,7 +4,7 @@ Fraud classifier for credit card transactions using classical ML, built as a rep
 fully lineaged pipeline (DVC + MLflow). See `CLAUDE.md` for project rules and `docs/plan.md`
 for the phase plan.
 
-Status: Phase 1 (data ingestion and EDA) implemented, awaiting tag `v0.1-eda`.
+Status: Phase 1 (data ingestion and EDA) complete, tag `v0.1-eda`.
 Phase 0 is tagged `v0.0-setup`. Next: Phase 2 (feature pipeline).
 
 ## Setup

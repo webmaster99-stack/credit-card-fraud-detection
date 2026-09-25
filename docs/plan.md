@@ -30,7 +30,7 @@ Time-based splits are required because in production the model scores the future
 - [x] EDA notebook with written conclusions
 - [x] Data card `docs/data_cards/sparkov.md`
 - [x] ADRs: "why Sparkov", "why time-based split"
-- [ ] README updated; tag `v0.1-eda`
+- [x] README updated; tag `v0.1-eda`
 
 ## Phase 2 — Feature engineering pipeline
 

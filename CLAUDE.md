@@ -161,8 +161,8 @@ The API returns the model version and pipeline version with every prediction, so
 
 ## Current status
 
-- Current phase: **Phase 1 — Data ingestion, versioning and EDA** (implemented locally; waiting on `dvc push`, git push, README and the `v0.1-eda` tag; see `docs/plan.md`)
-- Last completed tag: `v0.0-setup` (Phase 0)
+- Current phase: **Phase 2 — Feature engineering pipeline** (not started; see `docs/plan.md`)
+- Last completed tag: `v0.1-eda` (Phase 1); earlier: `v0.0-setup` (Phase 0)
 
 Update this section as work progresses.
 
