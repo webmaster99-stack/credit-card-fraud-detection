@@ -95,7 +95,7 @@ DagsHub is the hub: one free account gives a git mirror, a DVC remote and a host
 
 ## Repository structure
 
-One monorepo, so a single commit pins everything that produced a model. The local directory is `credit-card-fraud-detector`; the GitHub repo name is not decided yet (`fraud-detection/` below is a placeholder root).
+One monorepo, so a single commit pins everything that produced a model. The local directory is `credit-card-fraud-detector`; the GitHub repo is `webmaster99-stack/credit-card-fraud-detection` (`fraud-detection/` below is a placeholder root).
 
 ```
 fraud-detection/
@@ -161,7 +161,7 @@ The API returns the model version and pipeline version with every prediction, so
 
 ## Current status
 
-- Current phase: **Phase 0 — Setup** (in progress: local scaffolding done; remote accounts and services pending)
+- Current phase: **Phase 0 — Setup** (in progress: only the Colab bootstrap test remains)
 - Last completed tag: none
 
 Update this section as work progresses.
@@ -174,11 +174,11 @@ Phases 1–7 are in `docs/plan.md`.
 
 **Goal:** an empty but fully wired repo, where a trivial run already appears in DagsHub MLflow with its git commit and data hash.
 
-- [ ] `git init` this directory (it is not a git repo yet; training, lineage tags and phase tags all need one), then create the GitHub repo, mirror to DagsHub, create HF Hub model repo and Space — *`git init` done; GitHub repo, DagsHub mirror, HF repo and Space still to do (need owner's accounts; see HF Spaces note in `docs/infra.md`)*
-- [x] `pyproject.toml`, `uv.lock`, pre-commit (ruff, mypy), GitHub Actions running tests — *CI workflow written but has not run yet (needs the GitHub repo)*
-- [ ] `dvc init`, DagsHub DVC remote, credentials in `.env` (git-ignored) and GitHub secrets — *`dvc init` done, `.env.example` added; remote and credentials still to do*
-- [ ] MLflow tracking URI pointing to DagsHub; helper that stamps every run with the lineage tags — *helper (`src/fraud/models/lineage.py`) and smoke run done and unit-tested; not yet run against DagsHub*
-- [ ] Colab bootstrap notebook: clone, `uv sync`, `dvc pull`, set tracking URI — *`notebooks/00_colab_bootstrap.ipynb` written; repo URL is a placeholder and it is untested*
+- [x] `git init` this directory (it is not a git repo yet; training, lineage tags and phase tags all need one), then create the GitHub repo, mirror to DagsHub, create HF Hub model repo and Space — *locations recorded in `docs/infra.md`; the Space runs on a free ZeroGPU slot (see the decision there)*
+- [x] `pyproject.toml`, `uv.lock`, pre-commit (ruff, mypy), GitHub Actions running tests — *CI green on `main`*
+- [x] `dvc init`, DagsHub DVC remote, credentials in `.env` (git-ignored) and GitHub secrets — *the remote is configured but transfers are untested until Phase 1 puts data under DVC*
+- [x] MLflow tracking URI pointing to DagsHub; helper that stamps every run with the lineage tags — *smoke run `phase0-smoke` logged to DagsHub with all tags and artifacts; `dvc_data_md5` is `n/a` until Phase 1 creates `dvc.lock`*
+- [ ] Colab bootstrap notebook: clone, `uv sync`, `dvc pull`, set tracking URI — *`notebooks/00_colab_bootstrap.ipynb` written with the real repo URL; still needs a test run in Colab*
 - [x] Record current free-tier limits of DagsHub, HF, Render, Vercel and Neon in `docs/infra.md`
 
 ## Risks
