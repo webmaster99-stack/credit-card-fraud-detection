@@ -1,0 +1,17 @@
+# Every tunable value lives here. No magic numbers in code.
+seed: 42
+
+dataset:
+  name: sparkov
+  version: v1
+
+split:
+  train_start: "2019-01-01"
+  train_end: "2020-06-30"
+  valid_start: "2020-07-01"
+  valid_end: "2020-09-30"
+  test_start: "2020-10-01"
+  test_end: "2020-12-31"
+
+mlflow:
+  experiment_name: fraud-detection

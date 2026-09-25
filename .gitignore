@@ -1,0 +1,38 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Data and model binaries (tracked by DVC, never git)
+/data/raw/*
+/data/interim/*
+/data/processed/*
+!/data/*/.gitkeep
+*.pkl
+*.joblib
+*.onnx
+mlruns/
+
+# Web
+web/node_modules/
+web/.next/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
