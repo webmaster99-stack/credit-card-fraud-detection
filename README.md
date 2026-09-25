@@ -13,4 +13,12 @@ pre-commit install
 uv run pytest
 ```
 
-Status: Phase 0 (setup) in progress.
+Status: Phase 0 (setup) complete, tag `v0.0-setup`. Next: Phase 1 (data ingestion and EDA).
+
+## Links
+
+- Code: https://github.com/webmaster99-stack/credit-card-fraud-detection
+- Experiments, data and mirror: https://dagshub.com/webmaster99-stack/credit-card-fraud-detection
+- Model repo: https://huggingface.co/ilian-hadzhidimitrov/fraud-classifier
+- Demo (Gradio Space): https://huggingface.co/spaces/ilian-hadzhidimitrov/fraud-classifier-demo
+- Free-tier limits and infra decisions: `docs/infra.md`

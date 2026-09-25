@@ -20,7 +20,7 @@ any of them. Everything must stay rebuildable from git + DVC in case a free tier
 | DVC remote | `https://dagshub.com/webmaster99-stack/credit-card-fraud-detection.dvc` (credentials in git-ignored `.dvc/config.local`) |
 | MLflow tracking URI | `https://dagshub.com/webmaster99-stack/credit-card-fraud-detection.mlflow` (credentials in git-ignored `.env`) |
 | HF Hub model repo | https://huggingface.co/ilian-hadzhidimitrov/fraud-classifier |
-| HF Space (Gradio demo) | Created on a free ZeroGPU slot; name not yet recorded here |
+| HF Space (Gradio demo) | https://huggingface.co/spaces/ilian-hadzhidimitrov/fraud-classifier-demo (free ZeroGPU slot) |
 | GitHub Actions secrets | `MLFLOW_TRACKING_URI`, `MLFLOW_TRACKING_USERNAME`, `MLFLOW_TRACKING_PASSWORD` |
 
 ## Decisions made on these limits

@@ -161,8 +161,8 @@ The API returns the model version and pipeline version with every prediction, so
 
 ## Current status
 
-- Current phase: **Phase 0 — Setup** (in progress: only the Colab bootstrap test remains)
-- Last completed tag: none
+- Current phase: **Phase 1 — Data ingestion, versioning and EDA** (not started; see `docs/plan.md`)
+- Last completed tag: `v0.0-setup` (Phase 0)
 
 Update this section as work progresses.
 
@@ -178,7 +178,7 @@ Phases 1–7 are in `docs/plan.md`.
 - [x] `pyproject.toml`, `uv.lock`, pre-commit (ruff, mypy), GitHub Actions running tests — *CI green on `main`*
 - [x] `dvc init`, DagsHub DVC remote, credentials in `.env` (git-ignored) and GitHub secrets — *the remote is configured but transfers are untested until Phase 1 puts data under DVC*
 - [x] MLflow tracking URI pointing to DagsHub; helper that stamps every run with the lineage tags — *smoke run `phase0-smoke` logged to DagsHub with all tags and artifacts; `dvc_data_md5` is `n/a` until Phase 1 creates `dvc.lock`*
-- [ ] Colab bootstrap notebook: clone, `uv sync`, `dvc pull`, set tracking URI — *`notebooks/00_colab_bootstrap.ipynb` written with the real repo URL; still needs a test run in Colab*
+- [x] Colab bootstrap notebook: clone, `uv sync`, `dvc pull`, set tracking URI — *`notebooks/00_colab_bootstrap.ipynb`; test run in Colab succeeded (owner-confirmed)*
 - [x] Record current free-tier limits of DagsHub, HF, Render, Vercel and Neon in `docs/infra.md`
 
 ## Risks
