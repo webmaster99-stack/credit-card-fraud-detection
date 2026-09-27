@@ -73,6 +73,25 @@ def test_non_tunable_step_runs_a_single_trial(tmp_path: Path, split_features) ->
     assert not result.met_budget
 
 
+def test_nested_true_runs_as_a_child_of_an_active_run(tmp_path: Path, split_features) -> None:
+    X_train, y_train, X_valid, y_valid = split_features
+    with mlflow.start_run(run_name="sweep-parent"):
+        result = tune_step(
+            "logreg",
+            X_train,
+            y_train,
+            X_valid,
+            y_valid,
+            min_precision=0.5,
+            n_trials=2,
+            seed=42,
+            feature_set="v1",
+            results_path=tmp_path / "model_ladder.json",
+            nested=True,
+        )
+    assert result.key == "logreg"
+
+
 def test_rerunning_a_step_overwrites_its_row(tmp_path: Path, split_features) -> None:
     X_train, y_train, X_valid, y_valid = split_features
     results_path = tmp_path / "model_ladder.json"

@@ -66,13 +66,18 @@ def tune_step(
     seed: int,
     feature_set: str,
     results_path: Any = LADDER_RESULTS_PATH,
+    nested: bool = False,
 ) -> LadderResult:
-    """Run (or single-shot evaluate, if not tunable) one ladder step; return its best result."""
+    """Run (or single-shot evaluate, if not tunable) one ladder step; return its best result.
+
+    `nested=True` when called from inside another active MLflow run (`run_ladder.py`'s sweep-wide
+    parent run), so this step's run becomes a child rather than erroring on an already-active run.
+    """
     step = get_step(step_key)
     sampler = optuna.samplers.TPESampler(seed=seed)
     study = optuna.create_study(direction="maximize", sampler=sampler)
     trials = n_trials if step.space is not None else 1
-    with mlflow.start_run(run_name=f"tune-{step_key}-{feature_set}"):
+    with mlflow.start_run(run_name=f"tune-{step_key}-{feature_set}", nested=nested):
         mlflow.set_tags({"ladder_step": step_key, "feature_set": feature_set})
         study.optimize(
             lambda trial: _objective(
