@@ -83,7 +83,10 @@ def score_at_threshold(
     """All reported metrics for one fixed operating point, written to reports/*.json."""
     y_pred = flags_at_threshold(y_score, threshold)
     tp, fp, fn, tn = confusion_counts(y_true, y_pred)
-    precision = tp / (tp + fp) if (tp + fp) else 0.0
+    # Precision is vacuously 1.0 when nothing is flagged, matching sklearn's precision_recall_curve
+    # convention (recall_at_precision's fallback point) so the same threshold reports the same
+    # precision here and there.
+    precision = tp / (tp + fp) if (tp + fp) else 1.0
     recall = tp / (tp + fn) if (tp + fn) else 0.0
     return {
         "threshold": float(threshold),

@@ -55,7 +55,11 @@ stages:
       # Train and valid only: the test split is never touched before Phase 3, step 5.
       - data/processed/train.parquet
       - data/processed/valid.parquet
+      - src/fraud/features/__init__.py
+      - src/fraud/features/transformers.py
+      - src/fraud/features/history.py
       - src/fraud/features/pipeline.py
+      - src/fraud/models/metrics.py
       - src/fraud/models/calibrate.py
       - src/fraud/models/estimator.py
       - src/fraud/models/ladder.py
@@ -75,6 +79,8 @@ stages:
       - data/models/pipeline.joblib
       - data/processed/train.parquet
       - data/processed/valid.parquet
+      - src/fraud/features/pipeline.py
+      - src/fraud/models/metrics.py
       - src/fraud/models/evaluate.py
     params:
       - model.fn_cost

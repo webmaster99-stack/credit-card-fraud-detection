@@ -1,3 +1,4 @@
+import pytest
 import yaml
 
 from fraud.data.paths import INTERIM_PATH, PROCESSED_DIR, RAW_DIR
@@ -17,9 +18,10 @@ def test_dvc_outs_match_path_constants() -> None:
     assert _rel(INTERIM_PATH) in stages["split"]["deps"]
 
 
-def test_features_stage_never_depends_on_the_test_split() -> None:
+@pytest.mark.parametrize("stage_name", ["features", "train", "evaluate"])
+def test_stage_never_depends_on_the_test_split(stage_name: str) -> None:
     stage = yaml.safe_load((REPO_ROOT / "dvc.yaml").read_text(encoding="utf-8"))["stages"][
-        "features"
+        stage_name
     ]
     deps = stage["deps"]
     assert f"{_rel(PROCESSED_DIR)}/train.parquet" in deps
