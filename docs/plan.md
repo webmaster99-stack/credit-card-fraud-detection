@@ -60,11 +60,11 @@ The v1 vs v2 comparison is itself a reported result: how much recall do history 
 
 **Tasks**
 
-- [ ] v1 transformers in `src/fraud/features/` with tests
-- [ ] v2 history transformers with leakage tests (no future rows used)
-- [ ] Train/serve parity test
-- [ ] `features` stage in `dvc.yaml`; pipeline version set
-- [ ] README updated; tag `v0.2-features`
+- [x] v1 transformers in `src/fraud/features/` with tests
+- [x] v2 history transformers with leakage tests (no future rows used)
+- [x] Train/serve parity test
+- [x] `features` stage in `dvc.yaml`; pipeline version set
+- [x] README updated; tag `v0.2-features`
 
 ## Phase 3 — Modeling experiments
 

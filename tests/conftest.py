@@ -44,3 +44,45 @@ def raw() -> pd.DataFrame:
 @pytest.fixture
 def clean_cfg() -> dict:
     return load_params()["clean"]
+
+
+def make_clean_frame(n: int = 300, cards: int = 5, seed: int | None = None) -> pd.DataFrame:
+    """A cleaned-table-shaped frame with several cards, in time order, seeded from params."""
+    import numpy as np
+
+    rng = np.random.default_rng(load_params()["seed"] if seed is None else seed)
+    ts = pd.Timestamp("2020-01-01") + pd.to_timedelta(
+        np.sort(rng.integers(0, 40 * 24 * 3600, n)), unit="s"
+    )
+    lat, lon = rng.uniform(30, 45, n), rng.uniform(-120, -75, n)
+    return pd.DataFrame(
+        {
+            "trans_ts": ts,
+            "card_id": rng.choice([f"{i:016x}" for i in range(cards)], n),
+            "merchant": "Acme",
+            "category": rng.choice(["grocery_pos", "shopping_net", "travel"], n),
+            "amt": rng.uniform(1, 500, n).round(2),
+            "gender": rng.choice(["F", "M"], n),
+            "city": "Springfield",
+            "state": rng.choice(["IL", "TX", "NY"], n),
+            "zip": 62701,
+            "lat": lat,
+            "long": lon,
+            "city_pop": rng.integers(100, 1_000_000, n),
+            "job": "Engineer",
+            "dob": pd.Timestamp("1980-05-01"),
+            "merch_lat": lat + rng.uniform(-1, 1, n),
+            "merch_long": lon + rng.uniform(-1, 1, n),
+            "is_fraud": rng.integers(0, 2, n),
+        }
+    )
+
+
+@pytest.fixture
+def clean_frame() -> pd.DataFrame:
+    return make_clean_frame()
+
+
+@pytest.fixture
+def features_cfg() -> dict:
+    return load_params()["features"]

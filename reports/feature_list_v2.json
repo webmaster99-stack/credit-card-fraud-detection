@@ -1,0 +1,343 @@
+{
+  "pipeline_version": "features-1.0.0",
+  "feature_set": "v2",
+  "n_features": 84,
+  "features": [
+    {
+      "name": "log_amt",
+      "dtype": "float64"
+    },
+    {
+      "name": "hour",
+      "dtype": "float64"
+    },
+    {
+      "name": "weekday",
+      "dtype": "float64"
+    },
+    {
+      "name": "age",
+      "dtype": "float64"
+    },
+    {
+      "name": "log_city_pop",
+      "dtype": "float64"
+    },
+    {
+      "name": "distance_km",
+      "dtype": "float64"
+    },
+    {
+      "name": "txn_count_1h",
+      "dtype": "float64"
+    },
+    {
+      "name": "txn_count_24h",
+      "dtype": "float64"
+    },
+    {
+      "name": "txn_count_168h",
+      "dtype": "float64"
+    },
+    {
+      "name": "log_spend_1h",
+      "dtype": "float64"
+    },
+    {
+      "name": "log_spend_24h",
+      "dtype": "float64"
+    },
+    {
+      "name": "log_spend_168h",
+      "dtype": "float64"
+    },
+    {
+      "name": "amt_vs_card_mean",
+      "dtype": "float64"
+    },
+    {
+      "name": "hours_since_last_txn",
+      "dtype": "float64"
+    },
+    {
+      "name": "is_night",
+      "dtype": "float64"
+    },
+    {
+      "name": "is_first_category_use",
+      "dtype": "float64"
+    },
+    {
+      "name": "is_first_card_txn",
+      "dtype": "float64"
+    },
+    {
+      "name": "category_entertainment",
+      "dtype": "float32"
+    },
+    {
+      "name": "category_food_dining",
+      "dtype": "float32"
+    },
+    {
+      "name": "category_gas_transport",
+      "dtype": "float32"
+    },
+    {
+      "name": "category_grocery_net",
+      "dtype": "float32"
+    },
+    {
+      "name": "category_grocery_pos",
+      "dtype": "float32"
+    },
+    {
+      "name": "category_health_fitness",
+      "dtype": "float32"
+    },
+    {
+      "name": "category_home",
+      "dtype": "float32"
+    },
+    {
+      "name": "category_kids_pets",
+      "dtype": "float32"
+    },
+    {
+      "name": "category_misc_net",
+      "dtype": "float32"
+    },
+    {
+      "name": "category_misc_pos",
+      "dtype": "float32"
+    },
+    {
+      "name": "category_personal_care",
+      "dtype": "float32"
+    },
+    {
+      "name": "category_shopping_net",
+      "dtype": "float32"
+    },
+    {
+      "name": "category_shopping_pos",
+      "dtype": "float32"
+    },
+    {
+      "name": "category_travel",
+      "dtype": "float32"
+    },
+    {
+      "name": "gender_F",
+      "dtype": "float32"
+    },
+    {
+      "name": "gender_M",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_AK",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_AL",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_AR",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_AZ",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_CA",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_CO",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_CT",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_DC",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_DE",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_FL",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_GA",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_HI",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_IA",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_ID",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_IL",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_IN",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_KS",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_KY",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_LA",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_MA",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_MD",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_ME",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_MI",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_MN",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_MO",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_MS",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_MT",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_NC",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_ND",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_NE",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_NH",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_NJ",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_NM",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_NV",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_NY",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_OH",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_OK",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_OR",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_PA",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_RI",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_SC",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_SD",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_TN",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_TX",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_UT",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_VA",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_VT",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_WA",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_WI",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_WV",
+      "dtype": "float32"
+    },
+    {
+      "name": "state_WY",
+      "dtype": "float32"
+    }
+  ]
+}

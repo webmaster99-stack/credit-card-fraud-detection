@@ -28,3 +28,24 @@ stages:
     metrics:
       - reports/split_summary.json:
           cache: false
+  features:
+    cmd: python -m fraud.features.build
+    deps:
+      # Train and valid only: the test split is never an input before Phase 3, step 5.
+      - data/processed/train.parquet
+      - data/processed/valid.parquet
+      - src/fraud/features/__init__.py
+      - src/fraud/features/transformers.py
+      - src/fraud/features/history.py
+      - src/fraud/features/pipeline.py
+      - src/fraud/features/build.py
+    params:
+      - features
+    outs:
+      - reports/feature_list_v1.json:
+          cache: false
+      - reports/feature_list_v2.json:
+          cache: false
+    metrics:
+      - reports/features_summary.json:
+          cache: false

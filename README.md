@@ -4,8 +4,8 @@ Fraud classifier for credit card transactions using classical ML, built as a rep
 fully lineaged pipeline (DVC + MLflow). See `CLAUDE.md` for project rules and `docs/plan.md`
 for the phase plan.
 
-Status: Phase 1 (data ingestion and EDA) complete, tag `v0.1-eda`.
-Phase 0 is tagged `v0.0-setup`. Next: Phase 2 (feature pipeline).
+Status: Phase 2 (feature pipeline) complete, tag `v0.2-features`. Earlier: `v0.1-eda` (Phase 1),
+`v0.0-setup` (Phase 0). Next: Phase 3 (modeling experiments).
 
 ## Setup
 
@@ -20,7 +20,7 @@ uv run pytest
 
 ```bash
 uv run dvc pull        # fetch data from the DagsHub remote (no Kaggle token needed)
-uv run dvc repro       # ingest -> clean -> split; only re-runs what changed
+uv run dvc repro       # ingest -> clean -> split -> features; only re-runs what changed
 ```
 
 `dvc repro ingest` downloads from Kaggle and needs `KAGGLE_API_TOKEN` in `.env`. The stages:
@@ -33,6 +33,20 @@ uv run dvc repro       # ingest -> clean -> split; only re-runs what changed
 
 Splits are by time (train Jan 2019 to Jun 2020, validation Jul to Sep 2020, test Oct to Dec 2020), never random.
 The test split is used once, at the end of Phase 3.
+
+## Feature pipeline
+
+One scikit-learn pipeline per tier, in `src/fraud/features/` (version in `features/__init__.py`, design in
+`docs/adr/0003-feature-pipeline-design.md`):
+
+| Tier | Features | Card history |
+| --- | --- | --- |
+| `v1` (74 columns) | Transaction (log amount, category, hour, weekday, night flag), customer (age, gender, log city population, state), customer-merchant distance | No |
+| `v2` (84 columns) | v1 plus velocity (count and spend in the last 1 h / 24 h / 7 d) and behavioural (amount vs card mean, hours since last transaction, first use of category, first transaction on card) | Yes, strictly earlier rows only |
+
+Encoders, imputers and scalers are fitted on the training split inside the pipeline. The `features` stage fits both
+tiers on train, checks them on validation (train as card history) and writes `reports/feature_list_v1.json` and
+`reports/feature_list_v2.json`. It never reads the test split. Merchant, job and city are dropped for now (see the ADR).
 
 ## What the data looks like
 

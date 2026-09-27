@@ -83,3 +83,57 @@ stages:
       hash: md5
       md5: 803bacc765e232acfb88916752826dc5
       size: 583
+  features:
+    cmd: python -m fraud.features.build
+    deps:
+    - path: data/processed/train.parquet
+      hash: md5
+      md5: 79b308ad766f5b787e3fd7c8b4b6fe19
+      size: 51245818
+    - path: data/processed/valid.parquet
+      hash: md5
+      md5: 5eb19f7d629869e2b585e41102c38cb5
+      size: 10037261
+    - path: src/fraud/features/__init__.py
+      hash: md5
+      md5: 738c3d35e703104f7f1826b5bab04ebf
+      size: 128
+    - path: src/fraud/features/build.py
+      hash: md5
+      md5: b788e2f167d8bdb97079dc058d733328
+      size: 2434
+    - path: src/fraud/features/history.py
+      hash: md5
+      md5: 2a511198e7ee48d23daa1ad0548ca62f
+      size: 5471
+    - path: src/fraud/features/pipeline.py
+      hash: md5
+      md5: d1aca764994e54cc72b924708a9d8f2e
+      size: 4307
+    - path: src/fraud/features/transformers.py
+      hash: md5
+      md5: 3edfbc78b971ef8dafeee6cddbd5c56b
+      size: 4241
+    params:
+      params.yaml:
+        features:
+          night_start_hour: 22
+          night_end_hour: 4
+          velocity_windows_hours:
+          - 1
+          - 24
+          - 168
+          impute_strategy: median
+    outs:
+    - path: reports/feature_list_v1.json
+      hash: md5
+      md5: 582bfb856565ace50456aa963a3501ec
+      size: 5300
+    - path: reports/feature_list_v2.json
+      hash: md5
+      md5: 44c2b14a841f6c0076b19da53ad0bd22
+      size: 6052
+    - path: reports/features_summary.json
+      hash: md5
+      md5: f0c5fc3b9bec3b650b0aec01c89b9f07
+      size: 180

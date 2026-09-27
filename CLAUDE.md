@@ -48,7 +48,7 @@ This is a portfolio project, built to the standard of a system that could suppor
 
 ## Common commands
 
-**Working now:** `uv sync`, `dvc pull`/`dvc push`, `dvc repro` (ingest, clean, split), `pytest`, `ruff`, `mypy`, `pre-commit`. **Planned, not yet working:** the `uvicorn` and Gradio entry points (Phases 4-5). Run `dvc` through `uv run dvc ...` unless the venv is activated. `dvc repro ingest` needs a Kaggle token (`KAGGLE_API_TOKEN` or `KAGGLE_ACCESS_TOKEN` in `.env`).
+**Working now:** `uv sync`, `dvc pull`/`dvc push`, `dvc repro` (ingest, clean, split, features), `pytest`, `ruff`, `mypy`, `pre-commit`. **Planned, not yet working:** the `uvicorn` and Gradio entry points (Phases 4-5). Run `dvc` through `uv run dvc ...` unless the venv is activated. `dvc repro ingest` needs a Kaggle token (`KAGGLE_API_TOKEN` or `KAGGLE_ACCESS_TOKEN` in `.env`).
 
 ```bash
 uv sync                      # install locked dependencies
@@ -161,8 +161,8 @@ The API returns the model version and pipeline version with every prediction, so
 
 ## Current status
 
-- Current phase: **Phase 2 — Feature engineering pipeline** (not started; see `docs/plan.md`)
-- Last completed tag: `v0.1-eda` (Phase 1); earlier: `v0.0-setup` (Phase 0)
+- Current phase: **Phase 2 — Feature engineering pipeline** complete, tag `v0.2-features`. Next: Phase 3 (modeling experiments); see `docs/plan.md`
+- Last completed tag: `v0.2-features` (Phase 2); earlier: `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0)
 
 Update this section as work progresses.
 

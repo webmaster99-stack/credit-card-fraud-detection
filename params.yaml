@@ -32,3 +32,12 @@ clean:
   # Redundant or misleading. unix_time is the timestamp shifted back exactly 7 years.
   redundant_columns: ["Unnamed: 0", unix_time]
   merchant_prefix: "fraud_"
+
+features:
+  # Night = [night_start_hour, 24) plus [0, night_end_hour). EDA: 84.8% of frauds fall in 22:00-03:59.
+  night_start_hour: 22
+  night_end_hour: 4
+  # Velocity windows (hours) for the v2 history features: 1 h, 24 h, 7 d.
+  velocity_windows_hours: [1, 24, 168]
+  # Imputation of "no history yet" values (first transaction of a card), fitted on train only.
+  impute_strategy: median

@@ -1,0 +1,11 @@
+{
+  "pipeline_version": "features-1.0.0",
+  "v1": {
+    "n_features": 74,
+    "train_rows": 1326733
+  },
+  "v2": {
+    "n_features": 84,
+    "train_rows": 1326733
+  }
+}
