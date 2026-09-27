@@ -49,3 +49,41 @@ stages:
     metrics:
       - reports/features_summary.json:
           cache: false
+  train:
+    cmd: python -m fraud.models.train
+    deps:
+      # Train and valid only: the test split is never touched before Phase 3, step 5.
+      - data/processed/train.parquet
+      - data/processed/valid.parquet
+      - src/fraud/features/pipeline.py
+      - src/fraud/models/calibrate.py
+      - src/fraud/models/estimator.py
+      - src/fraud/models/ladder.py
+      - src/fraud/models/train.py
+    params:
+      - seed
+      - features
+      - model
+    outs:
+      - data/models/pipeline.joblib
+    metrics:
+      - reports/train_metrics.json:
+          cache: false
+  evaluate:
+    cmd: python -m fraud.models.evaluate
+    deps:
+      - data/models/pipeline.joblib
+      - data/processed/train.parquet
+      - data/processed/valid.parquet
+      - src/fraud/models/evaluate.py
+    params:
+      - model.fn_cost
+      - model.fp_cost
+    plots:
+      - reports/pr_curve.json:
+          cache: false
+          x: recall
+          y: precision
+    metrics:
+      - reports/evaluate_metrics.json:
+          cache: false
