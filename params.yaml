@@ -61,3 +61,12 @@ tune:
   # Optuna trials per tunable ladder step. Kept modest: DagsHub's free tier caps tracked experiments
   # on a private repo (docs/infra.md), and each trial is a nested MLflow run.
   n_trials: 25
+  # Per-step overrides where the default above is badly wrong for that model's per-trial cost.
+  # Measured once on the real train split (1.3M rows, v1 features, default hyperparams): random
+  # forest ~410s/fit, xgboost ~75s/fit, lightgbm ~25s/fit. Random forest's budget is cut hardest so
+  # a full ladder sweep stays on the order of an hour rather than several.
+  n_trials_by_step:
+    random_forest: 6
+    logreg_interact: 12
+    xgboost: 15
+    isolation_forest: 10

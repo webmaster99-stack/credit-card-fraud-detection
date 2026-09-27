@@ -187,8 +187,11 @@ def _space_spline_logreg(trial: optuna.Trial) -> dict[str, Any]:
 
 
 def _space_random_forest(trial: optuna.Trial) -> dict[str, Any]:
+    # n_estimators is capped at 300 (not 500+): measured at ~410s/fit for 300 trees on the full
+    # train split, by far the ladder's most expensive rung, so params.yaml's tune.n_trials_by_step
+    # also cuts this step's trial budget hardest.
     return {
-        "n_estimators": trial.suggest_int("n_estimators", 100, 500, step=50),
+        "n_estimators": trial.suggest_int("n_estimators", 100, 300, step=50),
         "max_depth": trial.suggest_int("max_depth", 4, 20),
         "min_samples_leaf": trial.suggest_int("min_samples_leaf", 1, 20),
     }

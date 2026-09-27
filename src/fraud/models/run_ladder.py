@@ -26,11 +26,14 @@ def main() -> None:
     parser.add_argument(
         "--steps", nargs="*", default=None, help="ladder step keys to run; default: all"
     )
-    parser.add_argument("--n-trials", type=int, default=None)
+    parser.add_argument(
+        "--n-trials", type=int, default=None, help="overrides params.yaml for every step"
+    )
     args = parser.parse_args()
 
     params = load_params()
-    n_trials = args.n_trials or params["tune"]["n_trials"]
+    default_trials = args.n_trials or params["tune"]["n_trials"]
+    trials_by_step = {} if args.n_trials else params["tune"].get("n_trials_by_step", {})
     steps = args.steps or [step.key for step in LADDER]
 
     with start_run(f"ladder-sweep-{args.feature_set}"):
@@ -43,7 +46,8 @@ def main() -> None:
         X_valid = transform_with_context(pipeline, valid, context=train)
 
         for key in steps:
-            print(f"=== tuning {key} ({args.feature_set}) ===", flush=True)
+            n_trials = trials_by_step.get(key, default_trials)
+            print(f"=== tuning {key} ({args.feature_set}, {n_trials} trials) ===", flush=True)
             result = tune_step(
                 key,
                 X_train,
