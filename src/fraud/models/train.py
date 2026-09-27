@@ -74,19 +74,23 @@ def fit_champion_candidate(
 def main() -> None:
     params = load_params()
     model_cfg = params["model"]
-    train = pd.read_parquet(PROCESSED_DIR / "train.parquet")
-    valid = pd.read_parquet(PROCESSED_DIR / "valid.parquet")
 
-    full_pipeline, metrics = fit_champion_candidate(
-        train, valid, model_cfg, params["features"], params["seed"]
-    )
-
-    MODEL_DIR.mkdir(parents=True, exist_ok=True)
-    joblib.dump(full_pipeline, MODEL_PATH)
-    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    TRAIN_METRICS_PATH.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
-
+    # The clean-tree check must run before this script writes anything of its own (the model
+    # bundle, reports/train_metrics.json): otherwise its own output would make the tree "dirty" for
+    # the very next run.
     with start_run(f"train-{model_cfg['step']}"):
+        train = pd.read_parquet(PROCESSED_DIR / "train.parquet")
+        valid = pd.read_parquet(PROCESSED_DIR / "valid.parquet")
+
+        full_pipeline, metrics = fit_champion_candidate(
+            train, valid, model_cfg, params["features"], params["seed"]
+        )
+
+        MODEL_DIR.mkdir(parents=True, exist_ok=True)
+        joblib.dump(full_pipeline, MODEL_PATH)
+        REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+        TRAIN_METRICS_PATH.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
+
         mlflow.log_params(
             {
                 "step": model_cfg["step"],
