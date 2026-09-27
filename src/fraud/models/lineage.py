@@ -4,6 +4,7 @@ A registered model version must answer four questions from its tags alone:
 which code, which data, which features, which pipeline version.
 """
 
+import os
 import subprocess
 import tempfile
 from collections.abc import Iterator
@@ -20,6 +21,10 @@ from fraud.params import PARAMS_PATH, REPO_ROOT, load_params
 
 DVC_DATA_PATH = "data/processed"
 NOT_AVAILABLE = "n/a"
+
+# mlflow prints a run-URL banner with a non-ASCII emoji on run end, which crashes on a Windows
+# console using a non-UTF8 code page (cp1252). Suppress it; nothing here depends on that banner.
+os.environ.setdefault("MLFLOW_SUPPRESS_PRINTING_URL_TO_STDOUT", "true")
 
 
 class DirtyTreeError(RuntimeError):
