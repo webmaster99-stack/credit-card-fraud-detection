@@ -137,3 +137,118 @@ stages:
       hash: md5
       md5: f0c5fc3b9bec3b650b0aec01c89b9f07
       size: 180
+  train:
+    cmd: python -m fraud.models.train
+    deps:
+    - path: data/processed/train.parquet
+      hash: md5
+      md5: 79b308ad766f5b787e3fd7c8b4b6fe19
+      size: 51245818
+    - path: data/processed/valid.parquet
+      hash: md5
+      md5: 5eb19f7d629869e2b585e41102c38cb5
+      size: 10037261
+    - path: src/fraud/features/__init__.py
+      hash: md5
+      md5: 738c3d35e703104f7f1826b5bab04ebf
+      size: 128
+    - path: src/fraud/features/history.py
+      hash: md5
+      md5: 00b3c8c1320e61de7be8689b2c60e0fe
+      size: 5471
+    - path: src/fraud/features/pipeline.py
+      hash: md5
+      md5: 7836990b5efc0935e1a16a9e94993c0c
+      size: 4362
+    - path: src/fraud/features/transformers.py
+      hash: md5
+      md5: 3edfbc78b971ef8dafeee6cddbd5c56b
+      size: 4241
+    - path: src/fraud/models/calibrate.py
+      hash: md5
+      md5: 074a92d93910b956a1c5053e71ab9eae
+      size: 1671
+    - path: src/fraud/models/estimator.py
+      hash: md5
+      md5: 37e2f1d7dc10d932926ded10c64235af
+      size: 2110
+    - path: src/fraud/models/ladder.py
+      hash: md5
+      md5: 4c849f12b27b629b235cf0bf13e0088a
+      size: 10680
+    - path: src/fraud/models/metrics.py
+      hash: md5
+      md5: 9590b43b7a0f4cb8fa17768563705329
+      size: 5286
+    - path: src/fraud/models/train.py
+      hash: md5
+      md5: e2094bac3eecd9e4320455999dc846f3
+      size: 5106
+    params:
+      params.yaml:
+        features:
+          night_start_hour: 22
+          night_end_hour: 4
+          velocity_windows_hours:
+          - 1
+          - 24
+          - 168
+          impute_strategy: median
+        model:
+          step: dummy
+          feature_set: v1
+          hyperparams: {}
+          calibration: sigmoid
+          min_precision: 0.5
+          fn_cost: 20.0
+          fp_cost: 1.0
+        seed: 42
+    outs:
+    - path: data/models/pipeline.joblib
+      hash: md5
+      md5: f2f3f7b77da32312fc8ab7cd6e6eef7c
+      size: 8270
+    - path: reports/train_metrics.json
+      hash: md5
+      md5: c5df07392e6cc7ebbbfd811a7e565348
+      size: 167
+  evaluate:
+    cmd: python -m fraud.models.evaluate
+    deps:
+    - path: data/models/pipeline.joblib
+      hash: md5
+      md5: f2f3f7b77da32312fc8ab7cd6e6eef7c
+      size: 8270
+    - path: data/processed/train.parquet
+      hash: md5
+      md5: 79b308ad766f5b787e3fd7c8b4b6fe19
+      size: 51245818
+    - path: data/processed/valid.parquet
+      hash: md5
+      md5: 5eb19f7d629869e2b585e41102c38cb5
+      size: 10037261
+    - path: src/fraud/features/pipeline.py
+      hash: md5
+      md5: 7836990b5efc0935e1a16a9e94993c0c
+      size: 4362
+    - path: src/fraud/models/evaluate.py
+      hash: md5
+      md5: 21c797b4ff06b72ee130c2fc163fb893
+      size: 2623
+    - path: src/fraud/models/metrics.py
+      hash: md5
+      md5: 9590b43b7a0f4cb8fa17768563705329
+      size: 5286
+    params:
+      params.yaml:
+        model.fn_cost: 20.0
+        model.fp_cost: 1.0
+    outs:
+    - path: reports/evaluate_metrics.json
+      hash: md5
+      md5: a2a2def41a7f2cbadeb03f09c616a96d
+      size: 202
+    - path: reports/pr_curve.json
+      hash: md5
+      md5: a194afbd3ce75381d7ab2f63b0f61bf5
+      size: 104

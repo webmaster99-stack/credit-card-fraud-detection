@@ -1,0 +1,11 @@
+{
+  "threshold": Infinity,
+  "precision": 1.0,
+  "recall": 0.0,
+  "pr_auc": 0.004407307282706644,
+  "expected_cost": 0.08814614565413287,
+  "tp": 0,
+  "fp": 0,
+  "fn": 1076,
+  "tn": 243064
+}

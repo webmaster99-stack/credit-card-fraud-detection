@@ -1,0 +1,9 @@
+{
+  "step": "dummy",
+  "feature_set": "v1",
+  "calibration": "sigmoid",
+  "threshold": Infinity,
+  "precision": 1.0,
+  "recall": 0.0,
+  "met_budget": false
+}
