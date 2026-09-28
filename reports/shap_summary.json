@@ -1,0 +1,85 @@
+{
+  "sample_size": 5000,
+  "top_features": [
+    {
+      "feature": "log_amt",
+      "mean_abs_shap": 0.8068203148336063
+    },
+    {
+      "feature": "log_spend_24h",
+      "mean_abs_shap": 0.5862942150946161
+    },
+    {
+      "feature": "is_night",
+      "mean_abs_shap": 0.3719697115548604
+    },
+    {
+      "feature": "txn_count_24h",
+      "mean_abs_shap": 0.31825993137448827
+    },
+    {
+      "feature": "category_gas_transport",
+      "mean_abs_shap": 0.3169013645414279
+    },
+    {
+      "feature": "hours_since_last_txn",
+      "mean_abs_shap": 0.30223092264274326
+    },
+    {
+      "feature": "txn_count_168h",
+      "mean_abs_shap": 0.2993124363638081
+    },
+    {
+      "feature": "category_shopping_pos",
+      "mean_abs_shap": 0.26817662861146024
+    },
+    {
+      "feature": "age",
+      "mean_abs_shap": 0.25006168818384605
+    },
+    {
+      "feature": "category_shopping_net",
+      "mean_abs_shap": 0.22704878639098747
+    },
+    {
+      "feature": "hour",
+      "mean_abs_shap": 0.2148996610043729
+    },
+    {
+      "feature": "log_city_pop",
+      "mean_abs_shap": 0.20895970822453105
+    },
+    {
+      "feature": "category_grocery_pos",
+      "mean_abs_shap": 0.17946358930368453
+    },
+    {
+      "feature": "amt_vs_card_mean",
+      "mean_abs_shap": 0.17400716696619584
+    },
+    {
+      "feature": "category_home",
+      "mean_abs_shap": 0.1654828648514947
+    },
+    {
+      "feature": "category_misc_net",
+      "mean_abs_shap": 0.1523270723656121
+    },
+    {
+      "feature": "category_entertainment",
+      "mean_abs_shap": 0.1499167610079431
+    },
+    {
+      "feature": "log_spend_168h",
+      "mean_abs_shap": 0.10846327122531024
+    },
+    {
+      "feature": "weekday",
+      "mean_abs_shap": 0.09301966318580882
+    },
+    {
+      "feature": "log_spend_1h",
+      "mean_abs_shap": 0.08816067657420627
+    }
+  ]
+}
