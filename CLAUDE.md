@@ -161,7 +161,13 @@ The API returns the model version and pipeline version with every prediction, so
 
 ## Current status
 
-- Current phase: **Phase 2 — Feature engineering pipeline** complete, tag `v0.2-features`. Next: Phase 3 (modeling experiments); see `docs/plan.md`
+- Current phase: **Phase 3 — Modeling experiments**, in progress; see `docs/plan.md`. Ladder swept
+  (steps 0-6, v1) and the top two models re-tuned on v2 (protocol step 4): champion candidate is
+  **lightgbm on v2 features**, recall 0.990 at precision 0.50 on validation (PR-AUC 0.978), beating
+  xgboost v2 (0.986), and both far ahead of any v1 model (best v1: xgboost, 0.921). Full comparison
+  in `reports/model_ladder.json`; deterministic `train`/`evaluate` dvc.yaml stages reproduce it.
+  Remaining: notebooks 02-05, error analysis, fairness check, model card, README table, the single
+  test-set evaluation (owner sign-off required before touching the test split), and tag `v0.3-model`.
 - Last completed tag: `v0.2-features` (Phase 2); earlier: `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0)
 
 Update this section as work progresses.
