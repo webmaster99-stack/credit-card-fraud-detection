@@ -1,0 +1,305 @@
+{
+  "n_missed_frauds": 13,
+  "n_false_alarms": 1146,
+  "missed_fraud_sample": [
+    {
+      "trans_ts": "2020-12-10 17:30:59",
+      "category": "travel",
+      "amt": 8.96,
+      "gender": "F",
+      "state": "CA",
+      "city_pop": 11256,
+      "fraud_score": 0.00029990821551220014
+    },
+    {
+      "trans_ts": "2020-12-06 13:10:58",
+      "category": "health_fitness",
+      "amt": 17.45,
+      "gender": "M",
+      "state": "VA",
+      "city_pop": 776,
+      "fraud_score": 0.00029983724306563355
+    },
+    {
+      "trans_ts": "2020-10-10 16:00:00",
+      "category": "kids_pets",
+      "amt": 21.09,
+      "gender": "F",
+      "state": "CA",
+      "city_pop": 1661,
+      "fraud_score": 0.00029986928516747343
+    },
+    {
+      "trans_ts": "2020-11-25 18:57:14",
+      "category": "kids_pets",
+      "amt": 21.55,
+      "gender": "M",
+      "state": "NH",
+      "city_pop": 7430,
+      "fraud_score": 0.0003011048256254656
+    },
+    {
+      "trans_ts": "2020-11-07 18:01:06",
+      "category": "personal_care",
+      "amt": 52.12,
+      "gender": "F",
+      "state": "OR",
+      "city_pop": 1288,
+      "fraud_score": 0.0003002706167435795
+    },
+    {
+      "trans_ts": "2020-10-14 20:07:19",
+      "category": "kids_pets",
+      "amt": 16.75,
+      "gender": "F",
+      "state": "MN",
+      "city_pop": 771,
+      "fraud_score": 0.0003041977643032899
+    },
+    {
+      "trans_ts": "2020-10-11 12:18:53",
+      "category": "travel",
+      "amt": 1.78,
+      "gender": "F",
+      "state": "NM",
+      "city_pop": 247,
+      "fraud_score": 0.00030076401799508716
+    },
+    {
+      "trans_ts": "2020-12-20 08:44:09",
+      "category": "shopping_pos",
+      "amt": 866.79,
+      "gender": "F",
+      "state": "MT",
+      "city_pop": 743,
+      "fraud_score": 0.0003006910527283147
+    },
+    {
+      "trans_ts": "2020-11-04 15:39:16",
+      "category": "personal_care",
+      "amt": 22.66,
+      "gender": "M",
+      "state": "WI",
+      "city_pop": 1360,
+      "fraud_score": 0.0003013033058436685
+    },
+    {
+      "trans_ts": "2020-11-07 22:01:26",
+      "category": "personal_care",
+      "amt": 51.43,
+      "gender": "F",
+      "state": "OR",
+      "city_pop": 1288,
+      "fraud_score": 0.0003009918295652551
+    },
+    {
+      "trans_ts": "2020-12-06 23:17:55",
+      "category": "food_dining",
+      "amt": 133.43,
+      "gender": "F",
+      "state": "IL",
+      "city_pop": 1807,
+      "fraud_score": 0.00030178802236373407
+    },
+    {
+      "trans_ts": "2020-10-31 22:05:26",
+      "category": "kids_pets",
+      "amt": 20.73,
+      "gender": "F",
+      "state": "CT",
+      "city_pop": 4720,
+      "fraud_score": 0.00030368026725453493
+    },
+    {
+      "trans_ts": "2020-11-07 19:17:36",
+      "category": "personal_care",
+      "amt": 47.57,
+      "gender": "F",
+      "state": "OR",
+      "city_pop": 1288,
+      "fraud_score": 0.00029982403147531527
+    }
+  ],
+  "false_alarm_sample": [
+    {
+      "trans_ts": "2020-10-19 23:15:44",
+      "category": "shopping_net",
+      "amt": 1957.5,
+      "gender": "M",
+      "state": "MD",
+      "city_pop": 19054,
+      "fraud_score": 0.0004883615340628144
+    },
+    {
+      "trans_ts": "2020-12-07 18:45:39",
+      "category": "personal_care",
+      "amt": 36.68,
+      "gender": "F",
+      "state": "OH",
+      "city_pop": 1443,
+      "fraud_score": 0.0003135535534410106
+    },
+    {
+      "trans_ts": "2020-11-12 23:23:04",
+      "category": "shopping_pos",
+      "amt": 290.13,
+      "gender": "F",
+      "state": "NY",
+      "city_pop": 3285,
+      "fraud_score": 0.00032032989436110287
+    },
+    {
+      "trans_ts": "2020-11-25 02:27:56",
+      "category": "misc_pos",
+      "amt": 9.38,
+      "gender": "F",
+      "state": "FL",
+      "city_pop": 237282,
+      "fraud_score": 0.000316217000040704
+    },
+    {
+      "trans_ts": "2020-10-29 17:02:11",
+      "category": "shopping_net",
+      "amt": 3120.74,
+      "gender": "F",
+      "state": "OK",
+      "city_pop": 551,
+      "fraud_score": 0.0003436154441857777
+    },
+    {
+      "trans_ts": "2020-11-13 03:32:53",
+      "category": "food_dining",
+      "amt": 274.08,
+      "gender": "M",
+      "state": "CA",
+      "city_pop": 1241364,
+      "fraud_score": 0.0003076091185066513
+    },
+    {
+      "trans_ts": "2020-12-21 16:44:01",
+      "category": "kids_pets",
+      "amt": 98.93,
+      "gender": "F",
+      "state": "VA",
+      "city_pop": 1051,
+      "fraud_score": 0.00030794738823666166
+    },
+    {
+      "trans_ts": "2020-10-10 22:18:05",
+      "category": "kids_pets",
+      "amt": 24.04,
+      "gender": "F",
+      "state": "AL",
+      "city_pop": 270712,
+      "fraud_score": 0.00030745550821284853
+    },
+    {
+      "trans_ts": "2020-12-01 13:00:00",
+      "category": "health_fitness",
+      "amt": 21.28,
+      "gender": "M",
+      "state": "LA",
+      "city_pop": 55581,
+      "fraud_score": 0.00774758820733608
+    },
+    {
+      "trans_ts": "2020-10-16 16:32:10",
+      "category": "shopping_net",
+      "amt": 920.87,
+      "gender": "M",
+      "state": "OH",
+      "city_pop": 86954,
+      "fraud_score": 0.00042556465203433784
+    },
+    {
+      "trans_ts": "2020-10-30 02:52:13",
+      "category": "misc_pos",
+      "amt": 8.31,
+      "gender": "F",
+      "state": "WY",
+      "city_pop": 35371,
+      "fraud_score": 0.00031663441651307017
+    },
+    {
+      "trans_ts": "2020-10-31 13:39:37",
+      "category": "shopping_pos",
+      "amt": 722.78,
+      "gender": "M",
+      "state": "MI",
+      "city_pop": 4474,
+      "fraud_score": 0.0003133063135189226
+    },
+    {
+      "trans_ts": "2020-12-11 15:13:52",
+      "category": "shopping_net",
+      "amt": 1407.94,
+      "gender": "F",
+      "state": "MI",
+      "city_pop": 3104,
+      "fraud_score": 0.00030596010527678385
+    },
+    {
+      "trans_ts": "2020-10-27 19:34:31",
+      "category": "personal_care",
+      "amt": 8.66,
+      "gender": "F",
+      "state": "NY",
+      "city_pop": 151022,
+      "fraud_score": 0.0003117261698790372
+    },
+    {
+      "trans_ts": "2020-11-23 17:38:45",
+      "category": "personal_care",
+      "amt": 18.04,
+      "gender": "F",
+      "state": "TX",
+      "city_pop": 4993,
+      "fraud_score": 0.0003869081760788696
+    },
+    {
+      "trans_ts": "2020-11-27 01:25:39",
+      "category": "shopping_net",
+      "amt": 900.01,
+      "gender": "F",
+      "state": "CO",
+      "city_pop": 61,
+      "fraud_score": 0.00034497144645356266
+    },
+    {
+      "trans_ts": "2020-10-09 06:18:07",
+      "category": "gas_transport",
+      "amt": 23.12,
+      "gender": "F",
+      "state": "ND",
+      "city_pop": 475,
+      "fraud_score": 0.0003255997294983522
+    },
+    {
+      "trans_ts": "2020-12-17 02:42:32",
+      "category": "gas_transport",
+      "amt": 22.41,
+      "gender": "F",
+      "state": "WA",
+      "city_pop": 149,
+      "fraud_score": 0.0003800842523346561
+    },
+    {
+      "trans_ts": "2020-10-19 01:02:28",
+      "category": "grocery_net",
+      "amt": 6.47,
+      "gender": "F",
+      "state": "IN",
+      "city_pop": 1423,
+      "fraud_score": 0.00032758224610294855
+    },
+    {
+      "trans_ts": "2020-11-06 17:38:09",
+      "category": "shopping_net",
+      "amt": 679.15,
+      "gender": "F",
+      "state": "NY",
+      "city_pop": 3255,
+      "fraud_score": 0.00030602550126872127
+    }
+  ]
+}
