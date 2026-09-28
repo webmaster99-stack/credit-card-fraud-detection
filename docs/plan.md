@@ -111,7 +111,7 @@ Resampling (SMOTE, undersampling) is an ablation on steps 1 and 4 only, applied 
 - [x] Ladder steps 0–6 run and logged — `reports/model_ladder.json`; champion candidate: lightgbm on v2 features
 - [x] Calibration and threshold selection — sigmoid calibration + threshold picked on validation, run by `train.py` for the champion
 - [x] v1 vs v2 comparison — top two models (lightgbm, xgboost) re-tuned on v2; both jump sharply over v1 (see `reports/model_ladder.json`)
-- [ ] Single test-set evaluation with confidence intervals
+- [x] Single test-set evaluation with confidence intervals — `reports/test_evaluation.json`: recall 0.986 (CI 0.978-0.993), precision 0.446 (CI 0.423-0.468, short of the 0.50 budget - a real generalization gap to flag honestly)
 - [x] SHAP explanations and plain-language reason generator in `src/fraud/explain/` — helpers built and tested; not yet run against the real champion in a notebook
 - [ ] Error analysis and fairness check
 - [ ] Model card; `champion`/`challenger` aliases set
