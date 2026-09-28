@@ -4,8 +4,9 @@ Fraud classifier for credit card transactions using classical ML, built as a rep
 fully lineaged pipeline (DVC + MLflow). See `CLAUDE.md` for project rules and `docs/plan.md`
 for the phase plan.
 
-Status: Phase 2 (feature pipeline) complete, tag `v0.2-features`. Earlier: `v0.1-eda` (Phase 1),
-`v0.0-setup` (Phase 0). Next: Phase 3 (modeling experiments).
+Status: Phase 3 (modeling experiments) in progress. Champion candidate: LightGBM on v2 (card-history)
+features, recall 0.986 at precision 0.446 on the single test-set evaluation — see Modeling, below.
+Earlier: `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0).
 
 ## Setup
 
@@ -48,6 +49,37 @@ Encoders, imputers and scalers are fitted on the training split inside the pipel
 tiers on train, checks them on validation (train as card history) and writes `reports/feature_list_v1.json` and
 `reports/feature_list_v2.json`. It never reads the test split. Merchant, job and city are dropped for now (see the ADR).
 
+## Modeling
+
+Ladder protocol in `docs/plan.md` (Phase 3): tune every rung on train (Optuna), score on validation
+by the primary metric (recall at precision ≥ 0.50), calibrate, pick a threshold, compare the top two
+models' v1 vs v2 feature sets, then evaluate once on test. Full comparison in
+`reports/model_ladder.json`; details and caveats in `docs/model_cards/v0.3-model.md`.
+
+| Model | Features | Recall @ P≥0.50 (valid) | PR-AUC (valid) |
+| --- | --- | --- | --- |
+| Dummy / amount-rule floor | v1 | 0.000 | 0.004 / 0.153 |
+| Logistic regression | v1 | 0.312 | 0.265 |
+| + splines/interactions | v1 | 0.266 | 0.292 |
+| Random forest | v1 | 0.892 | 0.842 |
+| LightGBM | v1 | 0.915 | 0.874 |
+| XGBoost | v1 | 0.921 | 0.888 |
+| Isolation Forest (unsupervised) | v1 | 0.002 | 0.025 |
+| XGBoost | v2 | 0.986 | 0.978 |
+| **LightGBM (champion)** | **v2** | **0.990** | **0.978** |
+
+Card-history (v2) features drive almost all of the gain over the best v1 model. Reproduce the
+champion deterministically:
+
+```bash
+uv run dvc repro train evaluate   # fits, calibrates, picks a threshold; validation metrics only
+```
+
+**Test-set result (single evaluation, `reports/test_evaluation.json`):** recall 0.986 (CI
+0.978–0.993), precision 0.446 (CI 0.423–0.468, short of the 0.50 target — a real, modest
+generalization gap, reported honestly rather than fixed by re-tuning against test), PR-AUC 0.973
+(CI 0.965–0.980).
+
 ## What the data looks like
 
 Details are in `notebooks/01_eda.ipynb` and `docs/data_cards/sparkov.md`.
@@ -65,3 +97,4 @@ should be read with that in mind. A real-data benchmark (ULB) is planned for Pha
 - Demo (Gradio Space): https://huggingface.co/spaces/ilian-hadzhidimitrov/fraud-classifier-demo
 - Free-tier limits and infra decisions: `docs/infra.md`
 - Design decisions: `docs/adr/`
+- Model card: `docs/model_cards/v0.3-model.md`
