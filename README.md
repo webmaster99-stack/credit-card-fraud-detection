@@ -7,7 +7,8 @@ for the phase plan.
 Status: Phase 3 (modeling experiments) complete, tag `v0.3-model`. Champion: LightGBM on v2
 (card-history) features, recall 0.986 at precision 0.446 on the single test-set evaluation — see
 Modeling, below. Earlier: `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0).
-Phase 4 (Gradio demo) is built and tested locally; the Space is not deployed yet.
+Phase 4 (Gradio demo) complete, tag `v0.4-demo`: the Space is live (link below) and serves a
+stateless v1 model, not the champion (see Demo).
 
 ## Setup
 
@@ -99,6 +100,8 @@ FRAUD_MODEL_SOURCE=data/bundle uv run python demo/app.py      # run the app loca
 uv run python demo/build_space.py                             # stage the Space folder (add --push to upload)
 ```
 
+Live demo: https://huggingface.co/spaces/ilian-hadzhidimitrov/fraud-classifier-demo (free ZeroGPU slot, so it
+may take a moment to wake up; the model itself runs on CPU). Deployment notes: `docs/infra.md`.
 Model card: `docs/model_cards/v0.4-demo.md`.
 
 ## What the data looks like

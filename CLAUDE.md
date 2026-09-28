@@ -170,16 +170,17 @@ The API returns the model version and pipeline version with every prediction, so
   sized generalization gap, documented rather than fixed by re-tuning against test (see
   `docs/model_cards/v0.3-model.md`). `fraud-classifier` registered on DagsHub MLflow: v1 (lightgbm
   v2) `@champion`, v2 (xgboost v2) `@challenger`.
-- Current phase: **Phase 4 — Packaging and Gradio demo**, in progress (code built and tested locally, **not deployed,
-  not tagged**). The demo serves a stateless v1 model, not the champion (ADR 0004): registry
+- Current phase: **Phase 4 — Packaging and Gradio demo** complete, tag `v0.4-demo`. The Space is live and verified on
+  ZeroGPU (`docs/infra.md`). The demo serves a stateless v1 model, not the champion (ADR 0004): registry
   `fraud-classifier` v3 (xgboost v1, recall 0.921 @ precision 0.50 on validation) under alias `demo`,
   trained by the `train_demo` dvc stage; `champion`/`challenger` untouched. `src/fraud/serving/`
   (`load_model`/`predict`/`explain`), `python -m fraud.serving.export` (bundle + model card, `--push` for
-  the HF Hub), `demo/app.py`, `demo/build_space.py`. Remaining: push the bundle to the HF Hub model repo,
-  deploy the Space and verify it on ZeroGPU (the `spaces.GPU` startup probe in `demo/app.py` is an
-  unverified assumption), update the README, tag `v0.4-demo`. See `docs/plan.md`.
-- Last completed tag: `v0.3-model` (Phase 3); earlier: `v0.2-features` (Phase 2), `v0.1-eda`
-  (Phase 1), `v0.0-setup` (Phase 0)
+  the HF Hub), `demo/app.py`, `demo/build_space.py`. Bundle pushed to the HF Hub model repo; Space deployed
+  (ZeroGPU builds on Python 3.12.12, not 3.11; the unused `spaces.GPU` startup probe works but was not tested
+  without). Next: Phase 5 (FastAPI + Next.js, online card-history store so the v2 champion can serve); see
+  `docs/plan.md`.
+- Last completed tag: `v0.4-demo` (Phase 4); earlier: `v0.3-model` (Phase 3), `v0.2-features` (Phase 2),
+  `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0)
 
 Update this section as work progresses.
 

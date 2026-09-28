@@ -31,6 +31,20 @@ any of them. Everything must stay rebuildable from git + DVC in case a free tier
   the demo free of GPU-specific code and verify that a CPU-only model serves correctly on a ZeroGPU
   Space (including whether the `spaces` decorator is needed) before relying on it.
 
+### ZeroGPU verification (2026-09-28, Phase 4)
+
+- **The Space runs on `zero-a10g` and serves the CPU-only model correctly**: single scoring, batch CSV and the
+  example buttons were exercised through the Space's public API and match local scores (template fraud row 89.2%).
+- **ZeroGPU ignores `python_version: "3.11"`** and builds on Python 3.10, where the pinned `numpy==2.4.6` does not
+  exist (first build failed with `BUILD_ERROR`). `demo/README.md` sets `python_version: "3.12.12"`, which built and
+  ran. The project itself is developed on Python 3.11, so the pickled pipeline is loaded under a newer minor version;
+  scores matched locally, but re-check them after any pin change.
+- The Space installs its own pins from `demo/requirements.txt` (checked against `uv.lock` by
+  `tests/test_space_requirements.py`) and vendors `src/fraud` next to `app.py`; it needs no DVC or MLflow credentials.
+- `demo/app.py` defines an unused `@spaces.GPU` function so the Space passes ZeroGPU's startup check. It works with
+  the probe present; whether the probe is actually required was **not** tested without it.
+- `HF_TOKEN` is not in `.env`; the export and Space uploads used the cached `huggingface-cli` login.
+
 ## Open issues
 
 - **DagsHub experiment cap.** If the repo is private, only 100 tracked experiments are free. A

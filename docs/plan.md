@@ -147,8 +147,9 @@ A "Try an example" button loads real fraud and legitimate rows from the test set
 - [x] Export script — `python -m fraud.serving.export` builds `data/bundle` from the `demo` alias and writes `docs/model_cards/v0.4-demo.md`; `--push` uploads to the HF Hub (built and run locally, **not yet pushed**)
 - [x] Gradio app in `demo/` — three tabs, checked locally through `gradio_client` and in the browser; `demo/build_space.py` stages the Space folder
 - [x] CI smoke test: load bundle, score the template CSV — `tests/test_serving.py::test_smoke_load_bundle_and_score_template` (synthetic bundle, no secrets needed)
-- [ ] Push the bundle to the HF Hub model repo; deploy the Space and verify it on ZeroGPU (`docs/infra.md`)
-- [ ] README updated after deploy; tag `v0.4-demo`
+- [x] Bundle pushed to the HF Hub model repo (`ilian-hadzhidimitrov/fraud-classifier`, v3 `@demo`); the Space downloads it at startup and scoring from a Hub download was checked
+- [x] Space deployed and verified on ZeroGPU (2026-09-28): `RUNNING` on `zero-a10g`; single scoring, batch CSV and example endpoints checked through its public API. Findings in `docs/infra.md`
+- [x] README updated after deploy; tag `v0.4-demo`
 
 ## Phase 5 — Full-stack app
 
