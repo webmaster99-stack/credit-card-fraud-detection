@@ -195,16 +195,16 @@ stages:
           - 168
           impute_strategy: median
         model:
-          step: xgboost
-          feature_set: v1
+          step: lightgbm
+          feature_set: v2
           hyperparams:
-            n_estimators: 350
-            max_depth: 10
-            learning_rate: 0.023771106051716496
-            min_child_weight: 19
-            subsample: 0.6199242313325556
-            colsample_bytree: 0.576038831716926
-            scale_pos_weight: 8.264496504035321
+            n_estimators: 450
+            num_leaves: 126
+            learning_rate: 0.0357166784849149
+            min_child_samples: 74
+            subsample: 0.5956307000059569
+            colsample_bytree: 0.6922798918828642
+            scale_pos_weight: 5.5404060794248595
           calibration: sigmoid
           min_precision: 0.5
           fn_cost: 20.0
@@ -213,19 +213,19 @@ stages:
     outs:
     - path: data/models/pipeline.joblib
       hash: md5
-      md5: e421a9482cbfbda2b2d630d9ccd56548
-      size: 3679838
+      md5: d7f5eeb5c6fc35a46f122842cd27ed60
+      size: 6347646
     - path: reports/train_metrics.json
       hash: md5
-      md5: 9b49d0946ee2f20f6ad760e40d487f4c
-      size: 194
+      md5: 9348f613740b10b55b1cb3e902825314
+      size: 197
   evaluate:
     cmd: python -m fraud.models.evaluate
     deps:
     - path: data/models/pipeline.joblib
       hash: md5
-      md5: e421a9482cbfbda2b2d630d9ccd56548
-      size: 3679838
+      md5: d7f5eeb5c6fc35a46f122842cd27ed60
+      size: 6347646
     - path: data/processed/train.parquet
       hash: md5
       md5: 79b308ad766f5b787e3fd7c8b4b6fe19
@@ -253,9 +253,9 @@ stages:
     outs:
     - path: reports/evaluate_metrics.json
       hash: md5
-      md5: fe2a68a04f285311236e8e730176c78c
-      size: 229
+      md5: a1403cd9071a0d0cbb51ff31466f4f80
+      size: 232
     - path: reports/pr_curve.json
       hash: md5
-      md5: 104bfd1b093a305b2dc570c786a33367
-      size: 5305397
+      md5: 4e1adb615833ee2db417ef8dc382be51
+      size: 13651913
