@@ -95,6 +95,27 @@
     "timestamp": "2026-09-28T08:20:26.529435+00:00"
   },
   {
+    "step_id": 4,
+    "key": "lightgbm",
+    "name": "LightGBM",
+    "feature_set": "v2",
+    "hyperparams": {
+      "n_estimators": 450,
+      "num_leaves": 126,
+      "learning_rate": 0.0357166784849149,
+      "min_child_samples": 74,
+      "subsample": 0.5956307000059569,
+      "colsample_bytree": 0.6922798918828642,
+      "scale_pos_weight": 5.5404060794248595
+    },
+    "recall_at_precision": 0.9897769516728625,
+    "precision_at_threshold": 0.5,
+    "pr_auc": 0.9778366546058609,
+    "met_budget": true,
+    "n_trials": 25,
+    "timestamp": "2026-09-28T09:27:32.996668+00:00"
+  },
+  {
     "step_id": 5,
     "key": "xgboost",
     "name": "XGBoost",
@@ -114,6 +135,27 @@
     "met_budget": true,
     "n_trials": 15,
     "timestamp": "2026-09-28T08:40:53.791740+00:00"
+  },
+  {
+    "step_id": 5,
+    "key": "xgboost",
+    "name": "XGBoost",
+    "feature_set": "v2",
+    "hyperparams": {
+      "n_estimators": 600,
+      "max_depth": 6,
+      "learning_rate": 0.2159421776838062,
+      "min_child_weight": 2,
+      "subsample": 0.9237751571235634,
+      "colsample_bytree": 0.7904006119666304,
+      "scale_pos_weight": 2.5165331045775954
+    },
+    "recall_at_precision": 0.9860594795539034,
+    "precision_at_threshold": 0.5,
+    "pr_auc": 0.9776794757499634,
+    "met_budget": true,
+    "n_trials": 15,
+    "timestamp": "2026-09-28T10:00:16.208416+00:00"
   },
   {
     "step_id": 6,
