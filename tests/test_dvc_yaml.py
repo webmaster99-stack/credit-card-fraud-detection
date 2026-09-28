@@ -18,7 +18,7 @@ def test_dvc_outs_match_path_constants() -> None:
     assert _rel(INTERIM_PATH) in stages["split"]["deps"]
 
 
-@pytest.mark.parametrize("stage_name", ["features", "train", "evaluate"])
+@pytest.mark.parametrize("stage_name", ["features", "train", "train_demo", "evaluate"])
 def test_stage_never_depends_on_the_test_split(stage_name: str) -> None:
     stage = yaml.safe_load((REPO_ROOT / "dvc.yaml").read_text(encoding="utf-8"))["stages"][
         stage_name

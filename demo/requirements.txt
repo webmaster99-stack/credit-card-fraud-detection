@@ -1,0 +1,15 @@
+# Runtime dependencies of the Space (gradio comes from sdk_version in README.md). The libraries that
+# decide how the pickled pipeline loads and scores are pinned to the versions in uv.lock; keep them
+# in sync when the lockfile changes (tests/test_space_requirements.py checks this).
+huggingface_hub==2.0.0
+joblib==1.6.0
+lightgbm==4.7.0
+numpy==2.4.6
+optuna==5.0.0
+pandas==2.3.3
+pandera==0.33.1
+pyyaml==6.0.3
+scikit-learn==1.9.1
+scipy==1.17.1
+shap==0.51.0
+xgboost==3.2.0

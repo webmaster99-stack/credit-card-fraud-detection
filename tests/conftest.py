@@ -86,3 +86,64 @@ def clean_frame() -> pd.DataFrame:
 @pytest.fixture
 def features_cfg() -> dict:
     return load_params()["features"]
+
+
+DEMO_MODEL_CFG = {
+    "step": "xgboost",
+    "feature_set": "v1",
+    "hyperparams": {"n_estimators": 20, "max_depth": 3},
+    "calibration": "sigmoid",
+    "min_precision": 0.5,
+}
+
+
+@pytest.fixture(scope="session")
+def bundle_dir(tmp_path_factory: pytest.TempPathFactory):
+    """A tiny but complete serving bundle, fitted on synthetic data (no DVC or MLflow needed)."""
+    from fraud.models.train import fit_champion_candidate
+    from fraud.serving import write_bundle
+    from fraud.serving.export import EXAMPLE_COLUMNS, build_cities
+
+    params = load_params()
+    df = make_clean_frame(n=600, cards=12)
+    train, valid = df.iloc[:400].reset_index(drop=True), df.iloc[400:].reset_index(drop=True)
+    pipeline, metrics = fit_champion_candidate(
+        train, valid, DEMO_MODEL_CFG, params["features"], seed=params["seed"]
+    )
+    metadata = {
+        "model_name": "fraud-classifier",
+        "model_version": "test-1",
+        "alias": "demo",
+        "pipeline_version": "features-test",
+        "feature_set": "v1",
+        "step": "xgboost",
+        "calibration": "sigmoid",
+        "threshold": metrics["threshold"],
+        "min_precision": 0.5,
+        "dataset_name": "sparkov",
+        "dataset_version": "v1",
+        "split_spec": "test split",
+        "git_commit": "abc1234",
+        "validation": {"precision": metrics["precision"], "recall": metrics["recall"]},
+        "reference_champion_test": {
+            "step": "lightgbm",
+            "feature_set": "v2",
+            "precision": 0.446,
+            "recall": 0.986,
+            "pr_auc": 0.973,
+            "confidence_intervals": {
+                "precision": [0.423, 0.468],
+                "recall": [0.978, 0.993],
+                "pr_auc": [0.965, 0.980],
+            },
+        },
+    }
+    examples = valid.groupby("is_fraud").head(3)[EXAMPLE_COLUMNS].reset_index(drop=True)
+    return write_bundle(
+        tmp_path_factory.mktemp("bundle"),
+        pipeline,
+        metadata,
+        model_card="# test card\n",
+        cities=build_cities(df),
+        examples=examples,
+    )

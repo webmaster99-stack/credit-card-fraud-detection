@@ -69,6 +69,47 @@ model:
   fn_cost: 20.0
   fp_cost: 1.0
 
+demo_model:
+  # The Phase 4 demo ships the v1 STATELESS pipeline (docs/plan.md guardrail): a form or CSV row has
+  # no card history, so the v2 champion cannot be served until Phase 5's history store exists. Same
+  # shape as `model` above so `fraud.models.train --section demo_model` reuses the whole train path.
+  # Config = the best v1 rung of the ladder (xgboost v1: recall 0.921 at precision 0.50 on
+  # validation, reports/model_ladder.json). Registered under the `demo` alias; champion/challenger
+  # stay untouched.
+  step: xgboost
+  feature_set: v1
+  hyperparams:
+    n_estimators: 350
+    max_depth: 10
+    learning_rate: 0.023771106051716496
+    min_child_weight: 19
+    subsample: 0.6199242313325556
+    colsample_bytree: 0.576038831716926
+    scale_pos_weight: 8.264496504035321
+  calibration: sigmoid
+  min_precision: 0.50
+  fn_cost: 20.0
+  fp_cost: 1.0
+
+serving:
+  # Registry alias the export script publishes (see demo_model above).
+  registry_alias: demo
+  hf_model_repo: ilian-hadzhidimitrov/fraud-classifier
+  hf_space_repo: ilian-hadzhidimitrov/fraud-classifier-demo
+  # CSV upload cap for the Gradio batch tab (docs/plan.md Phase 4 guardrails).
+  max_batch_rows: 10000
+  # Reasons shown per prediction (SHAP bar chart + plain text).
+  top_k_reasons: 5
+  # Batch tab: SHAP is computed only for flagged rows (docs/plan.md risk table), highest scores first,
+  # and at most this many; the results table on screen shows at most `batch_display_rows` rows
+  # (the downloadable CSV always has every row).
+  batch_explain_rows: 500
+  batch_display_rows: 500
+  github_repo: https://github.com/webmaster99-stack/credit-card-fraud-detection
+  # Real rows from the test split offered by the demo's "Try an example" button, per class. They are
+  # only displayed and scored for illustration; nothing is evaluated or tuned on them.
+  n_examples_per_class: 10
+
 tune:
   # Optuna trials per tunable ladder step. Kept modest: DagsHub's free tier caps tracked experiments
   # on a private repo (docs/infra.md), and each trial is a nested MLflow run.

@@ -7,9 +7,10 @@ per step with nested trials; this script reproduces just the winning configurati
 so `dvc repro train` always rebuilds the same artifact from the same inputs. It never reads the test
 split: that happens once, at the end of Phase 3, via `fraud.models.evaluate_test`.
 
-Usage: uv run python -m fraud.models.train
+Usage: uv run python -m fraud.models.train [--section model|demo_model]
 """
 
+import argparse
 import json
 from typing import Any
 
@@ -31,6 +32,15 @@ MODEL_DIR = REPO_ROOT / "data" / "models"
 MODEL_PATH = MODEL_DIR / "pipeline.joblib"
 REPORTS_DIR = REPO_ROOT / "reports"
 TRAIN_METRICS_PATH = REPORTS_DIR / "train_metrics.json"
+
+# Outputs per params.yaml section: `model` is the Phase 3 champion candidate, `demo_model` the v1
+# stateless model the Phase 4 demo serves.
+DEMO_MODEL_PATH = MODEL_DIR / "demo_pipeline.joblib"
+DEMO_TRAIN_METRICS_PATH = REPORTS_DIR / "train_metrics_demo.json"
+SECTION_OUTPUTS = {
+    "model": (MODEL_PATH, TRAIN_METRICS_PATH),
+    "demo_model": (DEMO_MODEL_PATH, DEMO_TRAIN_METRICS_PATH),
+}
 
 
 def fit_champion_candidate(
@@ -72,13 +82,21 @@ def fit_champion_candidate(
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--section", choices=list(SECTION_OUTPUTS), default="model")
+    section = parser.parse_args().section
+    model_path, metrics_path = SECTION_OUTPUTS[section]
+
     params = load_params()
-    model_cfg = params["model"]
+    model_cfg = params[section]
 
     # The clean-tree check must run before this script writes anything of its own (the model
-    # bundle, reports/train_metrics.json): otherwise its own output would make the tree "dirty" for
+    # bundle, the train metrics report): otherwise its own output would make the tree "dirty" for
     # the very next run.
-    with start_run(f"train-{model_cfg['step']}", ignore_dirty=("reports/train_metrics.json",)):
+    run_name = f"train-{model_cfg['step']}-{model_cfg['feature_set']}"
+    ignore_dirty = (metrics_path.relative_to(REPO_ROOT).as_posix(),)
+    with start_run(run_name, ignore_dirty=ignore_dirty) as run:
+        mlflow.set_tag("params_section", section)
         train = pd.read_parquet(PROCESSED_DIR / "train.parquet")
         valid = pd.read_parquet(PROCESSED_DIR / "valid.parquet")
 
@@ -87,9 +105,9 @@ def main() -> None:
         )
 
         MODEL_DIR.mkdir(parents=True, exist_ok=True)
-        joblib.dump(full_pipeline, MODEL_PATH)
+        joblib.dump(full_pipeline, model_path)
         REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-        TRAIN_METRICS_PATH.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
+        metrics_path.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
 
         mlflow.log_params(
             {
@@ -115,6 +133,7 @@ def main() -> None:
             serialization_format="cloudpickle",
         )
     print(json.dumps(metrics, indent=2))
+    print(f"MLflow run id: {run.info.run_id}")
 
 
 if __name__ == "__main__":

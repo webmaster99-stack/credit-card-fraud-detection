@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11,<3.12"
 dependencies = [
     "dvc>=3.50",
+    "huggingface-hub>=2.0.0",
     "joblib>=1.3",
     "kaggle>=2.2.4",
     "lightgbm>=4.3",
@@ -23,6 +24,9 @@ dependencies = [
 ]
 
 [dependency-groups]
+demo = [
+    "gradio>=5.38.2",
+]
 dev = [
     "ipykernel>=7.3.0",
     "matplotlib>=3.11.2",
@@ -36,6 +40,11 @@ dev = [
     "types-PyYAML>=6.0",
 ]
 
+[tool.uv]
+# `demo` (gradio) installs by default so CI runs the demo's tests; the Space installs its own
+# requirements (demo/requirements.txt).
+default-groups = ["dev", "demo"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -45,6 +54,8 @@ packages = ["src/fraud"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# demo/app.py is not a package; the demo tests import it as `app`.
+pythonpath = ["demo"]
 
 [tool.ruff]
 line-length = 100
@@ -76,3 +87,6 @@ ignore_missing_imports = true
 [tool.ruff.lint.per-file-ignores]
 # Notebooks are exploratory: long print lines and throwaway loop variables are fine.
 "notebooks/*.ipynb" = ["E501", "B007"]
+# The model card and About tab are Markdown templates; their table rows cannot be wrapped.
+"src/fraud/serving/export.py" = ["E501"]
+"demo/app.py" = ["E501"]

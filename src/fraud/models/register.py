@@ -1,7 +1,9 @@
 """Register a logged MLflow run's model in the registry and set its alias, per CLAUDE.md's model
 lineage rules ("Model Registry (aliases `champion`, `challenger`)").
 
-Usage: uv run python -m fraud.models.register <run_id> <champion|challenger>
+Usage: uv run python -m fraud.models.register <run_id> <champion|challenger|demo>
+
+`demo` marks the v1 stateless model the Phase 4 demo serves; it never moves champion/challenger.
 """
 
 import argparse
@@ -17,7 +19,7 @@ REGISTERED_MODEL_NAME = "fraud-classifier"
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run_id")
-    parser.add_argument("alias", choices=["champion", "challenger"])
+    parser.add_argument("alias", choices=["champion", "challenger", "demo"])
     args = parser.parse_args()
 
     load_dotenv(REPO_ROOT / ".env")
