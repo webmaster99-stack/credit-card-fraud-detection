@@ -45,19 +45,22 @@ features:
 model:
   # Deterministic config for the `train`/`evaluate` dvc.yaml stages: the current pick from the Phase 3
   # ladder (docs/plan.md). Updated as ladder steps are run; see reports/model_ladder.json for the
-  # full comparison. Champion candidate as of the v1 sweep: xgboost, recall 0.921 at precision 0.50
-  # (vs lightgbm 0.915, random_forest 0.892) - still provisional pending the v1-vs-v2 comparison and
-  # the single test-set evaluation.
-  step: xgboost
-  feature_set: v1
+  # full comparison. Champion candidate after the v1-vs-v2 comparison (protocol step 4): lightgbm on
+  # v2 (history) features, recall 0.990 at precision 0.50 (vs xgboost v2 0.986, and both far above
+  # their v1 versions: xgboost v1 0.921, lightgbm v1 0.915). History features are clearly worth it.
+  # Still provisional pending the single test-set evaluation. NOTE: Phase 4's Gradio demo ships the
+  # v1 stateless pipeline first regardless (docs/plan.md Phase 4 guardrails) - v2 needs the online
+  # card-history store that Phase 5 builds.
+  step: lightgbm
+  feature_set: v2
   hyperparams:
-    n_estimators: 350
-    max_depth: 10
-    learning_rate: 0.023771106051716496
-    min_child_weight: 19
-    subsample: 0.6199242313325556
-    colsample_bytree: 0.576038831716926
-    scale_pos_weight: 8.264496504035321
+    n_estimators: 450
+    num_leaves: 126
+    learning_rate: 0.0357166784849149
+    min_child_samples: 74
+    subsample: 0.5956307000059569
+    colsample_bytree: 0.6922798918828642
+    scale_pos_weight: 5.5404060794248595
   # "sigmoid" (Platt), "isotonic", or "none".
   calibration: sigmoid
   # False-alarm budget from CLAUDE.md: at most one false alarm per caught fraud.
