@@ -48,7 +48,7 @@ This is a portfolio project, built to the standard of a system that could suppor
 
 ## Common commands
 
-**Working now:** `uv sync`, `dvc pull`/`dvc push`, `dvc repro` (ingest, clean, split, features), `pytest`, `ruff`, `mypy`, `pre-commit`. **Planned, not yet working:** the `uvicorn` and Gradio entry points (Phases 4-5). Run `dvc` through `uv run dvc ...` unless the venv is activated. `dvc repro ingest` needs a Kaggle token (`KAGGLE_API_TOKEN` or `KAGGLE_ACCESS_TOKEN` in `.env`).
+**Working now:** `uv sync`, `dvc pull`/`dvc push`, `dvc repro` (ingest, clean, split, features, train, train_demo, evaluate), `pytest`, `ruff`, `mypy`, `pre-commit`, the Gradio demo (`FRAUD_MODEL_SOURCE=data/bundle uv run python demo/app.py`, after `uv run python -m fraud.serving.export`), and `uv run python demo/build_space.py` to stage the Space folder. **Planned, not yet working:** the `uvicorn` entry point (Phase 5). Run `dvc` through `uv run dvc ...` unless the venv is activated. `dvc repro ingest` needs a Kaggle token (`KAGGLE_API_TOKEN` or `KAGGLE_ACCESS_TOKEN` in `.env`).
 
 ```bash
 uv sync                      # install locked dependencies
@@ -62,7 +62,7 @@ dvc repro <stage>            # rebuild one stage (and what it depends on)
 ruff check . && ruff format . && mypy src
 pre-commit run --all-files
 uvicorn api.main:app --reload   # run the API locally (Phase 5)
-python demo/app.py              # run the Gradio demo locally (Phase 4)
+python demo/app.py              # run the Gradio demo locally (Phase 4; FRAUD_MODEL_SOURCE=data/bundle for a local export)
 ```
 
 Update this list as real entry points are created.
@@ -161,7 +161,7 @@ The API returns the model version and pipeline version with every prediction, so
 
 ## Current status
 
-- Current phase: **Phase 3 — Modeling experiments** complete, tag `v0.3-model`. Champion:
+- Phase 3 — Modeling experiments complete, tag `v0.3-model`. Champion:
   **lightgbm on v2 features** (recall 0.990 @ precision 0.50 on validation, PR-AUC 0.978), beating
   xgboost v2 (0.986) and every v1 model (best v1: xgboost, 0.921) — full ladder in
   `reports/model_ladder.json`, notebooks `02_baseline`-`05_explain`, deterministic `train`/`evaluate`
@@ -169,8 +169,15 @@ The API returns the model version and pipeline version with every prediction, so
   0.978-0.993), but **precision 0.446 (CI 0.423-0.468) misses the >=0.50 target** — a real, modestly-
   sized generalization gap, documented rather than fixed by re-tuning against test (see
   `docs/model_cards/v0.3-model.md`). `fraud-classifier` registered on DagsHub MLflow: v1 (lightgbm
-  v2) `@champion`, v2 (xgboost v2) `@challenger`. Next: Phase 4 (Gradio demo, ships the v1 stateless
-  pipeline first per its own guardrails); see `docs/plan.md`.
+  v2) `@champion`, v2 (xgboost v2) `@challenger`.
+- Current phase: **Phase 4 — Packaging and Gradio demo**, in progress (code built and tested locally, **not deployed,
+  not tagged**). The demo serves a stateless v1 model, not the champion (ADR 0004): registry
+  `fraud-classifier` v3 (xgboost v1, recall 0.921 @ precision 0.50 on validation) under alias `demo`,
+  trained by the `train_demo` dvc stage; `champion`/`challenger` untouched. `src/fraud/serving/`
+  (`load_model`/`predict`/`explain`), `python -m fraud.serving.export` (bundle + model card, `--push` for
+  the HF Hub), `demo/app.py`, `demo/build_space.py`. Remaining: push the bundle to the HF Hub model repo,
+  deploy the Space and verify it on ZeroGPU (the `spaces.GPU` startup probe in `demo/app.py` is an
+  unverified assumption), update the README, tag `v0.4-demo`. See `docs/plan.md`.
 - Last completed tag: `v0.3-model` (Phase 3); earlier: `v0.2-features` (Phase 2), `v0.1-eda`
   (Phase 1), `v0.0-setup` (Phase 0)
 

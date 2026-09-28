@@ -142,11 +142,13 @@ A "Try an example" button loads real fraud and legitimate rows from the test set
 
 **Tasks**
 
-- [ ] `src/fraud/serving/` with tests
-- [ ] Export script to HF Hub
-- [ ] Gradio app in `demo/`
-- [ ] CI smoke test: load bundle, score the template CSV
-- [ ] Space deployed; README updated; tag `v0.4-demo`
+- [x] `src/fraud/serving/` with tests — `schema.py` (Pandera input contract, readable errors, row cap), `model.py` (`load_model`/`predict`/`write_bundle`), `explain.py` (SHAP folded onto input features); `tests/test_serving*.py`
+- [x] Demo model: `train_demo` stage, registry v3 `@demo` (xgboost v1) — see `docs/adr/0004-demo-serves-the-stateless-v1-model.md`
+- [x] Export script — `python -m fraud.serving.export` builds `data/bundle` from the `demo` alias and writes `docs/model_cards/v0.4-demo.md`; `--push` uploads to the HF Hub (built and run locally, **not yet pushed**)
+- [x] Gradio app in `demo/` — three tabs, checked locally through `gradio_client` and in the browser; `demo/build_space.py` stages the Space folder
+- [x] CI smoke test: load bundle, score the template CSV — `tests/test_serving.py::test_smoke_load_bundle_and_score_template` (synthetic bundle, no secrets needed)
+- [ ] Push the bundle to the HF Hub model repo; deploy the Space and verify it on ZeroGPU (`docs/infra.md`)
+- [ ] README updated after deploy; tag `v0.4-demo`
 
 ## Phase 5 — Full-stack app
 

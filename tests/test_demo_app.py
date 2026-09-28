@@ -53,7 +53,7 @@ def test_score_single_explains_bad_input_in_plain_words(model) -> None:
     )
     assert verdict.startswith("### Could not score this transaction")
     assert "Column 'amt'" in verdict and "'yachts'" in verdict
-    assert chart.empty and reasons == ""
+    assert chart is None and reasons == ""
 
 
 def test_score_single_lowercase_state_is_accepted(model) -> None:

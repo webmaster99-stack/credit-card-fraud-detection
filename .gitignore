@@ -24,6 +24,9 @@ dist/
 *.joblib
 *.onnx
 mlruns/
+# Generated serving bundle and staged Space folder (published to the HF Hub, never git)
+/data/bundle/
+/data/space/
 
 # Web
 web/node_modules/

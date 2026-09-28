@@ -48,7 +48,6 @@ except ImportError:
     pass
 
 SETTINGS = load_params()["serving"]
-EMPTY_CHART = pd.DataFrame({"reason": [], "contribution": [], "effect": []})
 CHART_COLORS = {"raises fraud score": "#d95f02", "lowers fraud score": "#1f77b4"}
 TS_FORMAT = "%Y-%m-%d %H:%M:%S"
 DOB_FORMAT = "%Y-%m-%d"
@@ -92,7 +91,7 @@ def score_single(
     long: float | None,
     merch_lat: float | None,
     merch_long: float | None,
-) -> tuple[str, pd.DataFrame, str]:
+) -> tuple[str, pd.DataFrame | None, str]:
     """Verdict text, reasons chart data and reasons text for one transaction."""
     row = {
         "trans_ts": when,
@@ -112,7 +111,7 @@ def score_single(
         scored = predict(model, frame)
         reasons = explain(model, frame)[0]
     except InputValidationError as err:
-        return problems_markdown("Could not score this transaction", err), EMPTY_CHART, ""
+        return problems_markdown("Could not score this transaction", err), None, ""
     verdict = verdict_markdown(
         model, float(scored["fraud_probability"].iloc[0]), bool(scored["flagged"].iloc[0])
     )
@@ -317,7 +316,7 @@ def build_app(model: ServingModel) -> gr.Blocks:
                 with gr.Column():
                     verdict = gr.Markdown()
                     chart = gr.BarPlot(
-                        EMPTY_CHART,
+                        None,
                         x="reason",
                         y="contribution",
                         color="effect",
@@ -345,14 +344,20 @@ def build_app(model: ServingModel) -> gr.Blocks:
             ]
             outputs = [verdict, chart, reasons_text]
 
-            def score(*values: Any) -> tuple[str, pd.DataFrame, str]:
+            def score(*values: Any) -> tuple[str, pd.DataFrame | None, str]:
                 return score_single(model, *values)
 
             home_city.input(
-                lambda label: home_fields(cities, label), home_city, [state, city_pop, lat, long]
+                lambda label: home_fields(cities, label),
+                home_city,
+                [state, city_pop, lat, long],
+                api_name=False,
             )
             merch_city.input(
-                lambda label: merchant_fields(cities, label), merch_city, [merch_lat, merch_long]
+                lambda label: merchant_fields(cities, label),
+                merch_city,
+                [merch_lat, merch_long],
+                api_name=False,
             )
             score_button.click(score, form, outputs, api_name="score_single")
             example_targets = [
@@ -365,7 +370,7 @@ def build_app(model: ServingModel) -> gr.Blocks:
                     None,
                     example_targets,
                     api_name=f"example_{'fraud' if is_fraud else 'legitimate'}",
-                ).then(score, form, outputs)
+                ).then(score, form, outputs, api_name=False)
 
         with gr.Tab("Batch CSV"):
             max_rows = SETTINGS["max_batch_rows"]

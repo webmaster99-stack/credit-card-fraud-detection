@@ -7,7 +7,7 @@ for the phase plan.
 Status: Phase 3 (modeling experiments) complete, tag `v0.3-model`. Champion: LightGBM on v2
 (card-history) features, recall 0.986 at precision 0.446 on the single test-set evaluation — see
 Modeling, below. Earlier: `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0).
-Next: Phase 4 (Gradio demo).
+Phase 4 (Gradio demo) is built and tested locally; the Space is not deployed yet.
 
 ## Setup
 
@@ -81,6 +81,26 @@ uv run dvc repro train evaluate   # fits, calibrates, picks a threshold; validat
 generalization gap, reported honestly rather than fixed by re-tuning against test), PR-AUC 0.973
 (CI 0.965–0.980).
 
+## Demo (Phase 4)
+
+A Gradio app in `demo/` scores one transaction or a CSV (up to 10,000 rows), explains each score with
+SHAP reasons, and shows which model version answered. All model code lives in `src/fraud/serving/`
+(`load_model`, `predict`, `explain`), which the Phase 5 API will reuse.
+
+The demo serves a **stateless v1 model** (registry `fraud-classifier` v3, alias `demo`: xgboost, recall 0.921
+at precision 0.50 on validation), not the champion, because a form has no card history
+(`docs/adr/0004-demo-serves-the-stateless-v1-model.md`). It has not been scored on the test split.
+
+```bash
+uv run dvc repro train_demo                                   # train the demo model (clean git tree)
+uv run python -m fraud.models.register <run_id> demo          # alias it in the registry
+uv run python -m fraud.serving.export                         # build data/bundle (add --push for the HF Hub)
+FRAUD_MODEL_SOURCE=data/bundle uv run python demo/app.py      # run the app locally
+uv run python demo/build_space.py                             # stage the Space folder (add --push to upload)
+```
+
+Model card: `docs/model_cards/v0.4-demo.md`.
+
 ## What the data looks like
 
 Details are in `notebooks/01_eda.ipynb` and `docs/data_cards/sparkov.md`.
@@ -98,4 +118,4 @@ should be read with that in mind. A real-data benchmark (ULB) is planned for Pha
 - Demo (Gradio Space): https://huggingface.co/spaces/ilian-hadzhidimitrov/fraud-classifier-demo
 - Free-tier limits and infra decisions: `docs/infra.md`
 - Design decisions: `docs/adr/`
-- Model card: `docs/model_cards/v0.3-model.md`
+- Model cards: `docs/model_cards/v0.3-model.md` (champion), `docs/model_cards/v0.4-demo.md` (demo model)

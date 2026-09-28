@@ -259,3 +259,85 @@ stages:
       hash: md5
       md5: 4e1adb615833ee2db417ef8dc382be51
       size: 13651913
+  train_demo:
+    cmd: python -m fraud.models.train --section demo_model
+    deps:
+    - path: data/processed/train.parquet
+      hash: md5
+      md5: 79b308ad766f5b787e3fd7c8b4b6fe19
+      size: 51245818
+    - path: data/processed/valid.parquet
+      hash: md5
+      md5: 5eb19f7d629869e2b585e41102c38cb5
+      size: 10037261
+    - path: src/fraud/features/__init__.py
+      hash: md5
+      md5: 738c3d35e703104f7f1826b5bab04ebf
+      size: 128
+    - path: src/fraud/features/history.py
+      hash: md5
+      md5: 00b3c8c1320e61de7be8689b2c60e0fe
+      size: 5471
+    - path: src/fraud/features/pipeline.py
+      hash: md5
+      md5: 7836990b5efc0935e1a16a9e94993c0c
+      size: 4362
+    - path: src/fraud/features/transformers.py
+      hash: md5
+      md5: 3edfbc78b971ef8dafeee6cddbd5c56b
+      size: 4241
+    - path: src/fraud/models/calibrate.py
+      hash: md5
+      md5: 074a92d93910b956a1c5053e71ab9eae
+      size: 1671
+    - path: src/fraud/models/estimator.py
+      hash: md5
+      md5: 37e2f1d7dc10d932926ded10c64235af
+      size: 2110
+    - path: src/fraud/models/ladder.py
+      hash: md5
+      md5: 040b36a755d1cbbca91410b82280d577
+      size: 10925
+    - path: src/fraud/models/metrics.py
+      hash: md5
+      md5: 9590b43b7a0f4cb8fa17768563705329
+      size: 5286
+    - path: src/fraud/models/train.py
+      hash: md5
+      md5: f1b7ba5efa663c995b473750638a9c66
+      size: 6028
+    params:
+      params.yaml:
+        demo_model:
+          step: xgboost
+          feature_set: v1
+          hyperparams:
+            n_estimators: 350
+            max_depth: 10
+            learning_rate: 0.023771106051716496
+            min_child_weight: 19
+            subsample: 0.6199242313325556
+            colsample_bytree: 0.576038831716926
+            scale_pos_weight: 8.264496504035321
+          calibration: sigmoid
+          min_precision: 0.5
+          fn_cost: 20.0
+          fp_cost: 1.0
+        features:
+          night_start_hour: 22
+          night_end_hour: 4
+          velocity_windows_hours:
+          - 1
+          - 24
+          - 168
+          impute_strategy: median
+        seed: 42
+    outs:
+    - path: data/models/demo_pipeline.joblib
+      hash: md5
+      md5: 78d9c4207745854fd5ad1446db517447
+      size: 3679790
+    - path: reports/train_metrics_demo.json
+      hash: md5
+      md5: 9b49d0946ee2f20f6ad760e40d487f4c
+      size: 194
