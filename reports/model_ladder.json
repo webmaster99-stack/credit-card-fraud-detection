@@ -1,0 +1,134 @@
+[
+  {
+    "step_id": 0,
+    "key": "amount_rule",
+    "name": "Amount-rule heuristic",
+    "feature_set": "v1",
+    "hyperparams": {},
+    "recall_at_precision": 0.0,
+    "precision_at_threshold": 1.0,
+    "pr_auc": 0.15331279893463334,
+    "met_budget": false,
+    "n_trials": 1,
+    "timestamp": "2026-09-27T16:26:46.313127+00:00"
+  },
+  {
+    "step_id": 0,
+    "key": "dummy",
+    "name": "Dummy (always legit)",
+    "feature_set": "v1",
+    "hyperparams": {},
+    "recall_at_precision": 0.0,
+    "precision_at_threshold": 1.0,
+    "pr_auc": 0.004407307282706644,
+    "met_budget": false,
+    "n_trials": 1,
+    "timestamp": "2026-09-27T16:26:43.057166+00:00"
+  },
+  {
+    "step_id": 1,
+    "key": "logreg",
+    "name": "Logistic regression (L2, scaled)",
+    "feature_set": "v1",
+    "hyperparams": {
+      "C": 0.0011833253552609156
+    },
+    "recall_at_precision": 0.31226765799256506,
+    "precision_at_threshold": 0.5,
+    "pr_auc": 0.26517876375815247,
+    "met_budget": true,
+    "n_trials": 25,
+    "timestamp": "2026-09-27T16:37:22.924666+00:00"
+  },
+  {
+    "step_id": 2,
+    "key": "logreg_interact",
+    "name": "Logistic regression + splines/interactions",
+    "feature_set": "v1",
+    "hyperparams": {
+      "C": 0.001267425589893723,
+      "n_knots": 8
+    },
+    "recall_at_precision": 0.26579925650557623,
+    "precision_at_threshold": 0.5,
+    "pr_auc": 0.2924966247461196,
+    "met_budget": true,
+    "n_trials": 12,
+    "timestamp": "2026-09-27T16:49:27.640708+00:00"
+  },
+  {
+    "step_id": 3,
+    "key": "random_forest",
+    "name": "Random forest",
+    "feature_set": "v1",
+    "hyperparams": {
+      "n_estimators": 150,
+      "max_depth": 20,
+      "min_samples_leaf": 15
+    },
+    "recall_at_precision": 0.8921933085501859,
+    "precision_at_threshold": 0.5,
+    "pr_auc": 0.8419538446719264,
+    "met_budget": true,
+    "n_trials": 6,
+    "timestamp": "2026-09-28T08:06:49.812426+00:00"
+  },
+  {
+    "step_id": 4,
+    "key": "lightgbm",
+    "name": "LightGBM",
+    "feature_set": "v1",
+    "hyperparams": {
+      "n_estimators": 250,
+      "num_leaves": 37,
+      "learning_rate": 0.010774510659526162,
+      "min_child_samples": 5,
+      "subsample": 0.7402214569986092,
+      "colsample_bytree": 0.681994499505997,
+      "scale_pos_weight": 11.188467823534983
+    },
+    "recall_at_precision": 0.9154275092936803,
+    "precision_at_threshold": 0.5,
+    "pr_auc": 0.8744460054120583,
+    "met_budget": true,
+    "n_trials": 25,
+    "timestamp": "2026-09-28T08:20:26.529435+00:00"
+  },
+  {
+    "step_id": 5,
+    "key": "xgboost",
+    "name": "XGBoost",
+    "feature_set": "v1",
+    "hyperparams": {
+      "n_estimators": 350,
+      "max_depth": 10,
+      "learning_rate": 0.023771106051716496,
+      "min_child_weight": 19,
+      "subsample": 0.6199242313325556,
+      "colsample_bytree": 0.576038831716926,
+      "scale_pos_weight": 8.264496504035321
+    },
+    "recall_at_precision": 0.921003717472119,
+    "precision_at_threshold": 0.5,
+    "pr_auc": 0.8881979331922984,
+    "met_budget": true,
+    "n_trials": 15,
+    "timestamp": "2026-09-28T08:40:53.791740+00:00"
+  },
+  {
+    "step_id": 6,
+    "key": "isolation_forest",
+    "name": "Isolation Forest (unsupervised)",
+    "feature_set": "v1",
+    "hyperparams": {
+      "n_estimators": 150,
+      "contamination": 0.001595708469414836
+    },
+    "recall_at_precision": 0.0018587360594795538,
+    "precision_at_threshold": 0.5,
+    "pr_auc": 0.024940552885044202,
+    "met_budget": true,
+    "n_trials": 10,
+    "timestamp": "2026-09-28T08:45:53.379515+00:00"
+  }
+]
