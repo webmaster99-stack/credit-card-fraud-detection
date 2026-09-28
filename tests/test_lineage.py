@@ -40,6 +40,21 @@ def test_dirty_tree_refused(repo: Path) -> None:
         ensure_clean_tree(repo)
 
 
+def test_dirty_tree_ignores_named_paths(repo: Path) -> None:
+    # Simulates dvc repro removing a stage's own declared output before the stage's command runs.
+    (repo / "a.txt").unlink()
+    with pytest.raises(DirtyTreeError):
+        ensure_clean_tree(repo)
+    ensure_clean_tree(repo, ignore=("a.txt",))
+
+
+def test_dirty_tree_ignore_does_not_hide_other_changes(repo: Path) -> None:
+    (repo / "a.txt").unlink()
+    (repo / "b.txt").write_text("new")
+    with pytest.raises(DirtyTreeError):
+        ensure_clean_tree(repo, ignore=("a.txt",))
+
+
 def test_git_commit_is_short_sha(repo: Path) -> None:
     assert len(git_commit(repo)) >= 7
 

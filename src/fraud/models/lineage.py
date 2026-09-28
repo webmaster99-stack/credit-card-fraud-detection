@@ -36,12 +36,28 @@ def _git(*args: str, cwd: Path) -> str:
     return result.stdout.strip()
 
 
+def _git_lines(*args: str, cwd: Path) -> list[str]:
+    """Like `_git`, but for output where per-line column positions matter (porcelain status): a
+    whole-output `.strip()` would eat the leading space off just the first line and misalign it."""
+    result = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True, check=True)
+    return result.stdout.splitlines()
+
+
 def git_commit(repo: Path = REPO_ROOT) -> str:
     return _git("rev-parse", "--short", "HEAD", cwd=repo)
 
 
-def ensure_clean_tree(repo: Path = REPO_ROOT) -> None:
-    if _git("status", "--porcelain", cwd=repo):
+def ensure_clean_tree(repo: Path = REPO_ROOT, ignore: tuple[str, ...] = ()) -> None:
+    """Refuse a dirty tree, except for changes to `ignore` (relative paths).
+
+    `dvc repro` removes a stage's own declared outputs before running its command, which shows up as
+    a pending change to that stage's own report file before the script gets a chance to write it.
+    That is not the "uncommitted code/params" case this check exists for, so a stage may name its
+    own output path here.
+    """
+    lines = _git_lines("status", "--porcelain", cwd=repo)
+    dirty = [line for line in lines if line[3:] not in ignore]
+    if dirty:
         raise DirtyTreeError("Refusing to run: git tree has uncommitted changes.")
 
 
@@ -96,14 +112,16 @@ def start_run(
     *,
     require_clean: bool = True,
     repo: Path = REPO_ROOT,
+    ignore_dirty: tuple[str, ...] = (),
 ) -> Iterator[mlflow.ActiveRun]:
     """Open an MLflow run stamped with lineage tags and the reproducibility artifacts.
 
     Tracking URI and credentials come from the environment (.env locally, secrets in CI).
+    `ignore_dirty` is forwarded to `ensure_clean_tree` (see its docstring).
     """
     load_dotenv(repo / ".env")
     if require_clean:
-        ensure_clean_tree(repo)
+        ensure_clean_tree(repo, ignore=ignore_dirty)
     params = load_params(repo / "params.yaml")
     mlflow.set_experiment(params["mlflow"]["experiment_name"])
     with mlflow.start_run(run_name=run_name) as run:

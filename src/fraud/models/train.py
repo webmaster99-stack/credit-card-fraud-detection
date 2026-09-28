@@ -78,7 +78,7 @@ def main() -> None:
     # The clean-tree check must run before this script writes anything of its own (the model
     # bundle, reports/train_metrics.json): otherwise its own output would make the tree "dirty" for
     # the very next run.
-    with start_run(f"train-{model_cfg['step']}"):
+    with start_run(f"train-{model_cfg['step']}", ignore_dirty=("reports/train_metrics.json",)):
         train = pd.read_parquet(PROCESSED_DIR / "train.parquet")
         valid = pd.read_parquet(PROCESSED_DIR / "valid.parquet")
 
