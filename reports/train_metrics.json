@@ -1,9 +1,9 @@
 {
-  "step": "dummy",
+  "step": "xgboost",
   "feature_set": "v1",
   "calibration": "sigmoid",
-  "threshold": Infinity,
-  "precision": 1.0,
-  "recall": 0.0,
-  "met_budget": false
+  "threshold": 0.007063651457428932,
+  "precision": 0.5,
+  "recall": 0.921003717472119,
+  "met_budget": true
 }

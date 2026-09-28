@@ -174,16 +174,16 @@ stages:
       size: 2110
     - path: src/fraud/models/ladder.py
       hash: md5
-      md5: 4c849f12b27b629b235cf0bf13e0088a
-      size: 10680
+      md5: 040b36a755d1cbbca91410b82280d577
+      size: 10925
     - path: src/fraud/models/metrics.py
       hash: md5
       md5: 9590b43b7a0f4cb8fa17768563705329
       size: 5286
     - path: src/fraud/models/train.py
       hash: md5
-      md5: e2094bac3eecd9e4320455999dc846f3
-      size: 5106
+      md5: 87f5668fa1e8c12998b374578245ed66
+      size: 5152
     params:
       params.yaml:
         features:
@@ -195,9 +195,16 @@ stages:
           - 168
           impute_strategy: median
         model:
-          step: dummy
+          step: xgboost
           feature_set: v1
-          hyperparams: {}
+          hyperparams:
+            n_estimators: 350
+            max_depth: 10
+            learning_rate: 0.023771106051716496
+            min_child_weight: 19
+            subsample: 0.6199242313325556
+            colsample_bytree: 0.576038831716926
+            scale_pos_weight: 8.264496504035321
           calibration: sigmoid
           min_precision: 0.5
           fn_cost: 20.0
@@ -206,19 +213,19 @@ stages:
     outs:
     - path: data/models/pipeline.joblib
       hash: md5
-      md5: f2f3f7b77da32312fc8ab7cd6e6eef7c
-      size: 8270
+      md5: e421a9482cbfbda2b2d630d9ccd56548
+      size: 3679838
     - path: reports/train_metrics.json
       hash: md5
-      md5: c5df07392e6cc7ebbbfd811a7e565348
-      size: 167
+      md5: 9b49d0946ee2f20f6ad760e40d487f4c
+      size: 194
   evaluate:
     cmd: python -m fraud.models.evaluate
     deps:
     - path: data/models/pipeline.joblib
       hash: md5
-      md5: f2f3f7b77da32312fc8ab7cd6e6eef7c
-      size: 8270
+      md5: e421a9482cbfbda2b2d630d9ccd56548
+      size: 3679838
     - path: data/processed/train.parquet
       hash: md5
       md5: 79b308ad766f5b787e3fd7c8b4b6fe19
@@ -246,9 +253,9 @@ stages:
     outs:
     - path: reports/evaluate_metrics.json
       hash: md5
-      md5: a2a2def41a7f2cbadeb03f09c616a96d
-      size: 202
+      md5: fe2a68a04f285311236e8e730176c78c
+      size: 229
     - path: reports/pr_curve.json
       hash: md5
-      md5: a194afbd3ce75381d7ab2f63b0f61bf5
-      size: 104
+      md5: 104bfd1b093a305b2dc570c786a33367
+      size: 5305397
