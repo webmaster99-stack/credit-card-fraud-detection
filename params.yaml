@@ -51,16 +51,16 @@ model:
   # Still provisional pending the single test-set evaluation. NOTE: Phase 4's Gradio demo ships the
   # v1 stateless pipeline first regardless (docs/plan.md Phase 4 guardrails) - v2 needs the online
   # card-history store that Phase 5 builds.
-  step: xgboost
+  step: lightgbm
   feature_set: v2
   hyperparams:
-    n_estimators: 600
-    max_depth: 6
-    learning_rate: 0.2159421776838062
-    min_child_weight: 2
-    subsample: 0.9237751571235634
-    colsample_bytree: 0.7904006119666304
-    scale_pos_weight: 2.5165331045775954
+    n_estimators: 450
+    num_leaves: 126
+    learning_rate: 0.0357166784849149
+    min_child_samples: 74
+    subsample: 0.5956307000059569
+    colsample_bytree: 0.6922798918828642
+    scale_pos_weight: 5.5404060794248595
   # "sigmoid" (Platt), "isotonic", or "none".
   calibration: sigmoid
   # False-alarm budget from CLAUDE.md: at most one false alarm per caught fraud.
