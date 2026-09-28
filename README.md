@@ -4,9 +4,10 @@ Fraud classifier for credit card transactions using classical ML, built as a rep
 fully lineaged pipeline (DVC + MLflow). See `CLAUDE.md` for project rules and `docs/plan.md`
 for the phase plan.
 
-Status: Phase 3 (modeling experiments) in progress. Champion candidate: LightGBM on v2 (card-history)
-features, recall 0.986 at precision 0.446 on the single test-set evaluation — see Modeling, below.
-Earlier: `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0).
+Status: Phase 3 (modeling experiments) complete, tag `v0.3-model`. Champion: LightGBM on v2
+(card-history) features, recall 0.986 at precision 0.446 on the single test-set evaluation — see
+Modeling, below. Earlier: `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0).
+Next: Phase 4 (Gradio demo).
 
 ## Setup
 

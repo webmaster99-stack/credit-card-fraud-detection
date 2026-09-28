@@ -107,7 +107,7 @@ Resampling (SMOTE, undersampling) is an ablation on steps 1 and 4 only, applied 
 **Tasks**
 
 - [x] `train` and `evaluate` stages in `dvc.yaml`
-- [ ] Notebooks `02_baseline` through `05_explain`
+- [x] Notebooks `02_baseline` through `05_explain`
 - [x] Ladder steps 0–6 run and logged — `reports/model_ladder.json`; champion candidate: lightgbm on v2 features
 - [x] Calibration and threshold selection — sigmoid calibration + threshold picked on validation, run by `train.py` for the champion
 - [x] v1 vs v2 comparison — top two models (lightgbm, xgboost) re-tuned on v2; both jump sharply over v1 (see `reports/model_ladder.json`)
@@ -116,7 +116,7 @@ Resampling (SMOTE, undersampling) is an ablation on steps 1 and 4 only, applied 
 - [x] Error analysis and fairness check — `reports/error_analysis.json`, `reports/fairness.json`; written up in the model card
 - [x] Model card; `champion`/`challenger` aliases set — `docs/model_cards/v0.3-model.md`; `fraud-classifier` v1 (lightgbm v2) `@champion`, v2 (xgboost v2) `@challenger` on DagsHub MLflow
 - [x] Comparison table in README
-- [ ] Tag `v0.3-model`
+- [x] Tag `v0.3-model`
 
 ## Phase 4 — Packaging and Gradio demo
 

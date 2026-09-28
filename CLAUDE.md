@@ -161,17 +161,18 @@ The API returns the model version and pipeline version with every prediction, so
 
 ## Current status
 
-- Current phase: **Phase 3 — Modeling experiments**, nearly done; see `docs/plan.md`. Champion:
+- Current phase: **Phase 3 — Modeling experiments** complete, tag `v0.3-model`. Champion:
   **lightgbm on v2 features** (recall 0.990 @ precision 0.50 on validation, PR-AUC 0.978), beating
   xgboost v2 (0.986) and every v1 model (best v1: xgboost, 0.921) — full ladder in
-  `reports/model_ladder.json`, deterministic `train`/`evaluate` dvc.yaml stages reproduce it. Single
-  test-set evaluation done (owner-approved): recall 0.986 (CI 0.978-0.993), but **precision 0.446
-  (CI 0.423-0.468) misses the >=0.50 target** — a real, modestly-sized generalization gap, documented
-  rather than fixed by re-tuning against test (see `docs/model_cards/v0.3-model.md`). Error analysis,
-  fairness check and global SHAP summary done. `fraud-classifier` registered on DagsHub MLflow: v1
-  (lightgbm v2) `@champion`, v2 (xgboost v2) `@challenger`. Remaining: notebooks 02-05, tag
-  `v0.3-model`.
-- Last completed tag: `v0.2-features` (Phase 2); earlier: `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0)
+  `reports/model_ladder.json`, notebooks `02_baseline`-`05_explain`, deterministic `train`/`evaluate`
+  dvc.yaml stages reproduce it. Single test-set evaluation done (owner-approved): recall 0.986 (CI
+  0.978-0.993), but **precision 0.446 (CI 0.423-0.468) misses the >=0.50 target** — a real, modestly-
+  sized generalization gap, documented rather than fixed by re-tuning against test (see
+  `docs/model_cards/v0.3-model.md`). `fraud-classifier` registered on DagsHub MLflow: v1 (lightgbm
+  v2) `@champion`, v2 (xgboost v2) `@challenger`. Next: Phase 4 (Gradio demo, ships the v1 stateless
+  pipeline first per its own guardrails); see `docs/plan.md`.
+- Last completed tag: `v0.3-model` (Phase 3); earlier: `v0.2-features` (Phase 2), `v0.1-eda`
+  (Phase 1), `v0.0-setup` (Phase 0)
 
 Update this section as work progresses.
 
