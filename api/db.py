@@ -25,7 +25,16 @@ _SCORE_COLUMNS = ["fraud_probability", "flagged", "model_name", "model_version",
 
 
 def open_pool(database_url: str, *, min_size: int = 1, max_size: int = 5) -> ConnectionPool:
-    pool = ConnectionPool(database_url, min_size=min_size, max_size=max_size, open=False)
+    # Neon closes idle connections (scale-to-zero, pooler timeouts), so test each connection as it
+    # is handed out and replace a dead one; max_idle retires connections before Neon does.
+    pool = ConnectionPool(
+        database_url,
+        min_size=min_size,
+        max_size=max_size,
+        max_idle=60,
+        check=ConnectionPool.check_connection,
+        open=False,
+    )
     pool.open(wait=True, timeout=10)
     return pool
 
