@@ -134,6 +134,9 @@ monitoring:
   # Performance: alert when recall on labelled predictions drops more than this vs the test recall.
   recall_drop_points: 0.10
   min_labels_for_performance: 30
+  # Rows per side given to the Evidently HTML report. Its size (~4 MB) is the embedded JS bundle
+  # and does not depend on this; sampling only cuts the job's runtime (44 s at 50k rows vs 15 s).
+  report_sample_rows: 5000
   # Days of history the nightly job looks back over, and reports kept in the table.
   lookback_days: 14
   keep_reports: 60

@@ -147,7 +147,8 @@ def build_summary(
 
 def main() -> int:
     load_dotenv(REPO_ROOT / ".env")
-    cfg = load_params()["monitoring"]
+    params = load_params()
+    cfg = params["monitoring"]
     pool = open_pool(os.environ["DATABASE_URL"])
     try:
         init_schema(pool)
@@ -159,7 +160,13 @@ def main() -> int:
         html = None
         if len(predictions) >= int(cfg["min_rows_per_day"]):
             columns = [*cfg["numeric_features"], *cfg["categorical_features"]]
-            html = evidently_html(reference, predictions, columns)
+            cap = int(cfg["report_sample_rows"])
+            seed = int(params["seed"])
+            html = evidently_html(
+                reference.sample(min(cap, len(reference)), random_state=seed),
+                predictions.sample(min(cap, len(predictions)), random_state=seed),
+                columns,
+            )
         save_monitoring_report(pool, "nightly", summary, html, keep=int(cfg["keep_reports"]))
     finally:
         close_pool(pool)
