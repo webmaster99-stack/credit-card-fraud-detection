@@ -92,7 +92,7 @@ Steps 1-3 are done. The API is live on Render and `GET /health` returns
 | Postgres | Neon, pooled endpoint (`-pooler`), `sslmode=require&channel_binding=require` |
 | Env vars set | `DATABASE_URL`, `API_KEY`, `MODEL_REVISION=champion` |
 | Env vars not set | `ALLOWED_ORIGINS` (defaults to `http://localhost:3000`; set it to the Vercel URL once step 5 is done, or browser calls fail CORS) |
-| Auto-deploy | **On** (every push to `main` deploys). Step 2 above says to turn it off so `deploy-api` deploys on `v*` tags; that has not been done, and `RENDER_DEPLOY_HOOK_URL` is not configured. |
+| Deploys | Render auto-deploy is off; `deploy-api` in `ci.yml` fires the `RENDER_DEPLOY_HOOK_URL` secret's hook on `v*` tag pushes, after tests and the image build pass. |
 | Vercel | Not created yet (step 5) |
 
 The Docker build was first verified by Render itself, not locally (the local `docker build` was blocked

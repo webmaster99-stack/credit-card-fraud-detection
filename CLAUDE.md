@@ -197,9 +197,9 @@ The API returns the model version and pipeline version with every prediction, so
   rest of the deployed state in `docs/infra.md`: `README.md` and `params.yaml` copied into the image
   (`FRAUD_PARAMS_PATH` points `fraud.params` at the latter, because the non-editable install has no
   repo root), `libgomp1` installed, and the Postgres pool validating connections on checkout
-  (`check_connection`) because Neon drops idle ones. Still open: Render auto-deploy is on (the docs planned
-  tag-only deploys via `RENDER_DEPLOY_HOOK_URL`); `ALLOWED_ORIGINS` is unset (default localhost); `API_KEY`
-  leaked into Render logs once and should be rotated; the local `docker build` was never run (C: drive was
+  (`check_connection`) because Neon drops idle ones. Render auto-deploy is off; CI deploys on `v*` tag pushes via
+  `RENDER_DEPLOY_HOOK_URL` (untested until the next tag). Still open: `ALLOWED_ORIGINS` is unset (default
+  localhost); `API_KEY` leaked into Render logs once and should be rotated; the local `docker build` was never run (C: drive was
   full). The Next.js frontend (`web/`, App Router, TypeScript, Tailwind v4) is built: single-transaction
   form, batch CSV upload/download, model info page, a Phase-6 monitoring placeholder, and an
   API-key-never-reaches-the-browser design (every call goes through `web/app/api/*` route handlers to the
