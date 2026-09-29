@@ -15,12 +15,13 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-install-project --no-default-groups --group api
 
-COPY README.md ./
+COPY README.md params.yaml ./
 COPY src ./src
 COPY api ./api
 RUN uv sync --locked --no-editable --no-default-groups --group api
 
-ENV PATH="/opt/venv/bin:$PATH"
+ENV PATH="/opt/venv/bin:$PATH" \
+    FRAUD_PARAMS_PATH=/app/params.yaml
 
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s \
