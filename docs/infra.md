@@ -52,3 +52,36 @@ any of them. Everything must stay rebuildable from git + DVC in case a free tier
   or be mindful of this cap.
 - Vercel monthly bandwidth/invocation allotments and Render outbound bandwidth allotments were not
   stated on the pages consulted. Look them up before Phase 5.
+
+## Phase 5 setup (owner action required)
+
+The API (`api/`) and its tests are built and pass against a real Postgres (verified locally via
+`docker-compose.yml`'s `db` service - see ADR 0005). Three accounts still need to be created by hand
+before the service is actually live; none of this can be done from the repo alone.
+
+1. **Neon**: create a project, copy its connection string into `DATABASE_URL` (a GitHub secret for
+   CI/deploy, and a Render environment variable for the running service). `api/db.py`'s
+   `init_schema` creates the `predictions` table itself on first startup - no separate migration
+   step.
+2. **Render**: new Web Service, "Docker" runtime, this GitHub repo, Dockerfile path `api/Dockerfile`,
+   root directory `.`. Environment variables: `DATABASE_URL` (from Neon), `API_KEY` (any long random
+   string - the frontend needs the same value), `ALLOWED_ORIGINS` (the Vercel URL once it exists),
+   `MODEL_REVISION=champion`. **Turn off Render's auto-deploy on push** - `.github/workflows/ci.yml`'s
+   `deploy-api` job deploys deliberately, only on a `v*` tag, once the image has built and tests have
+   passed. Copy the service's Deploy Hook URL (Settings -> Deploy Hook) into the GitHub secret
+   `RENDER_DEPLOY_HOOK_URL`.
+3. Before the first deploy, export and push the champion bundle so the branch the API downloads from
+   actually exists: `uv run python -m fraud.serving.export --alias champion --push`.
+4. Free tier: the service sleeps after 15 min idle and takes about a minute to wake on the first
+   request after that (recorded in the table above). `web/components/ApiStatusBanner.tsx` already
+   polls `/health` and shows a "waking up" banner while it isn't `ok`.
+5. **Vercel**: import this GitHub repo, set the project root to `web/`. Environment variables (set
+   as server-only, i.e. not prefixed `NEXT_PUBLIC_`): `FRAUD_API_URL` (the Render service's URL),
+   `FRAUD_API_KEY` (the same value as the API's `API_KEY`). The app is built and passes `next build`
+   locally (`web/package.json`); no code changes should be needed to deploy it as-is.
+
+**Not yet done, blocked on this machine's C: drive being full (0 bytes free, 2026-09-29):** building
+`api/Dockerfile` end-to-end with `docker build`. The dependency resolution ran correctly (confirmed:
+uv resolved and started downloading all ~260 packages without error) before Docker Desktop's own
+storage went read-only and crashed. Re-run `docker compose up --build` once there's disk space, to
+confirm the image actually builds and serves before relying on Render to build the same Dockerfile.

@@ -31,6 +31,7 @@ mlruns/
 # Web
 web/node_modules/
 web/.next/
+web/*.tsbuildinfo
 
 # OS / editor
 .DS_Store

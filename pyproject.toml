@@ -27,7 +27,17 @@ dependencies = [
 demo = [
     "gradio>=5.38.2",
 ]
+api = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic-settings>=2.4",
+    "psycopg[binary]>=3.2",
+    "psycopg-pool>=3.2",
+    "slowapi>=0.1.9",
+    "python-multipart>=0.0.9",
+]
 dev = [
+    "httpx>=0.27",
     "ipykernel>=7.3.0",
     "matplotlib>=3.11.2",
     "mypy>=1.10",
@@ -41,9 +51,9 @@ dev = [
 ]
 
 [tool.uv]
-# `demo` (gradio) installs by default so CI runs the demo's tests; the Space installs its own
-# requirements (demo/requirements.txt).
-default-groups = ["dev", "demo"]
+# `demo` (gradio) and `api` (FastAPI) install by default so CI runs their tests; the Space installs
+# its own requirements (demo/requirements.txt), and Render installs from the Docker image.
+default-groups = ["dev", "demo", "api"]
 
 [build-system]
 requires = ["hatchling"]
@@ -54,12 +64,13 @@ packages = ["src/fraud"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# demo/app.py is not a package; the demo tests import it as `app`.
-pythonpath = ["demo"]
+# demo/app.py is not a package; the demo tests import it as `app`. `.` puts the repo root on the
+# path so `api/` (also not installed as a package) can be imported as `api.*`.
+pythonpath = ["demo", "."]
 
 [tool.ruff]
 line-length = 100
-src = ["src", "tests"]
+src = ["src", "tests", "api"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
@@ -67,7 +78,7 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-files = ["src"]
+files = ["src", "api"]
 
 [[tool.mypy.overrides]]
 module = [
@@ -81,6 +92,7 @@ module = [
     "shap.*",
     "scipy.*",
     "joblib.*",
+    "slowapi.*",
 ]
 ignore_missing_imports = true
 

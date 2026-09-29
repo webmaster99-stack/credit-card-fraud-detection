@@ -30,6 +30,27 @@ def test_smoke_load_bundle_and_score_template(bundle_dir: Path) -> None:
     assert model.pipeline_version == "features-test"
 
 
+def test_write_bundle_v2_feature_list_includes_history_columns(bundle_dir_v2: Path) -> None:
+    """Regression test: `write_bundle` used to crash on a v2 pipeline (no card_id to group by)."""
+    import json
+
+    from fraud.serving.model import FEATURE_LIST_FILE
+
+    listing = json.loads((bundle_dir_v2 / FEATURE_LIST_FILE).read_text(encoding="utf-8"))
+    names = [f["name"] for f in listing["features"]]
+    assert "txn_count_1h" in names and "amt_vs_card_mean" in names
+
+
+def test_smoke_load_v2_bundle_and_score_with_card_id(bundle_dir_v2: Path) -> None:
+    model = load_model(bundle_dir_v2)
+    template = pd.read_csv(bundle_dir_v2 / TEMPLATE_FILE).assign(card_id="probe-card")
+    scored = predict(model, template)
+
+    assert len(scored) == len(template)
+    assert scored["fraud_probability"].between(0, 1).all()
+    assert model.metadata["feature_set"] == "v2"
+
+
 def test_predict_matches_pipeline_and_ignores_batching(bundle_dir: Path) -> None:
     model = load_model(bundle_dir)
     df = pd.read_csv(bundle_dir / EXAMPLES_FILE).drop(columns="is_fraud")

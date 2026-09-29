@@ -1,12 +1,17 @@
+import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import pandas as pd
+import pytest
 
 from conftest import make_clean_frame
 from fraud.serving.export import (
     EXAMPLE_COLUMNS,
+    build_champion_metadata,
     build_cities,
     build_metadata,
+    render_champion_model_card,
     render_model_card,
     sample_examples,
 )
@@ -56,3 +61,52 @@ def test_metadata_and_model_card_state_lineage_and_who_owns_the_test_metrics() -
         assert expected in card
     assert "has **not** been evaluated on the test split" in card
     assert "belongs to the registry champion" in card
+
+
+CHAMPION_RUN = SimpleNamespace(
+    info=SimpleNamespace(run_id="run1"),
+    data=SimpleNamespace(
+        tags={"git_commit": "deadbee", "dataset_name": "sparkov", "dvc_data_md5": "md5.dir"},
+        params={"step": "lightgbm", "feature_set": "v2", "calibration": "sigmoid"},
+        metrics={"precision": 0.6, "recall": 0.99},
+    ),
+)
+TEST_EVAL = {
+    "step": "lightgbm",
+    "feature_set": "v2",
+    "precision": 0.446,
+    "recall": 0.986,
+    "pr_auc": 0.973,
+    "confidence_intervals": {
+        "precision": [0.423, 0.468],
+        "recall": [0.978, 0.993],
+        "pr_auc": [0.965, 0.980],
+    },
+}
+
+
+def test_champion_metadata_and_card_use_the_models_own_test_metrics(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    eval_path = tmp_path / "test_evaluation.json"
+    eval_path.write_text(json.dumps(TEST_EVAL), encoding="utf-8")
+    monkeypatch.setattr("fraud.serving.export.TEST_EVALUATION_PATH", eval_path)
+
+    meta = build_champion_metadata(CHAMPION_RUN, "1", "champion", threshold=0.0003)
+    card = render_champion_model_card(meta)
+
+    assert meta["test"]["recall"] == 0.986
+    assert meta["min_precision"] == 0.50  # from params.yaml's `model` section, not `demo_model`
+    assert "requires the online history store" in card
+    assert "0.986" in card and "0.446" in card
+
+
+def test_champion_metadata_refuses_a_mismatched_test_evaluation(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    eval_path = tmp_path / "test_evaluation.json"
+    eval_path.write_text(json.dumps({**TEST_EVAL, "step": "xgboost"}), encoding="utf-8")
+    monkeypatch.setattr("fraud.serving.export.TEST_EVALUATION_PATH", eval_path)
+
+    with pytest.raises(SystemExit, match="is for xgboost/v2"):
+        build_champion_metadata(CHAMPION_RUN, "1", "champion", threshold=0.0003)

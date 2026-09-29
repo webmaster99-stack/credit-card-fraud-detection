@@ -48,7 +48,7 @@ This is a portfolio project, built to the standard of a system that could suppor
 
 ## Common commands
 
-**Working now:** `uv sync`, `dvc pull`/`dvc push`, `dvc repro` (ingest, clean, split, features, train, train_demo, evaluate), `pytest`, `ruff`, `mypy`, `pre-commit`, the Gradio demo (`FRAUD_MODEL_SOURCE=data/bundle uv run python demo/app.py`, after `uv run python -m fraud.serving.export`), and `uv run python demo/build_space.py` to stage the Space folder. **Planned, not yet working:** the `uvicorn` entry point (Phase 5). Run `dvc` through `uv run dvc ...` unless the venv is activated. `dvc repro ingest` needs a Kaggle token (`KAGGLE_API_TOKEN` or `KAGGLE_ACCESS_TOKEN` in `.env`).
+**Working now:** `uv sync`, `dvc pull`/`dvc push`, `dvc repro` (ingest, clean, split, features, train, train_demo, evaluate), `pytest`, `ruff`, `mypy`, `pre-commit`, the Gradio demo (`FRAUD_MODEL_SOURCE=data/bundle uv run python demo/app.py`, after `uv run python -m fraud.serving.export`), `uv run python demo/build_space.py` to stage the Space folder, and the `uvicorn` entry point (`api/`, Phase 5) locally against `docker-compose.yml`'s Postgres (needs `DATABASE_URL`, `API_KEY` in `.env`; not yet deployed to Render — `docs/infra.md`). **Planned, not yet working:** the Next.js frontend (`web/`). Run `dvc` through `uv run dvc ...` unless the venv is activated. `dvc repro ingest` needs a Kaggle token (`KAGGLE_API_TOKEN` or `KAGGLE_ACCESS_TOKEN` in `.env`).
 
 ```bash
 uv sync                      # install locked dependencies
@@ -59,9 +59,10 @@ pytest                       # tests
 pytest tests/path/test_x.py::test_name   # a single test
 pytest -k "<expr>"                       # tests matching a name expression
 dvc repro <stage>            # rebuild one stage (and what it depends on)
-ruff check . && ruff format . && mypy src
+ruff check . && ruff format . && mypy src api
 pre-commit run --all-files
-uvicorn api.main:app --reload   # run the API locally (Phase 5)
+docker compose up -d db         # local Postgres for the API (port 5433; see docker-compose.yml)
+uv run uvicorn api.main:app --reload   # run the API locally (Phase 5; needs DATABASE_URL, API_KEY in .env)
 python demo/app.py              # run the Gradio demo locally (Phase 4; FRAUD_MODEL_SOURCE=data/bundle for a local export)
 ```
 
@@ -177,8 +178,27 @@ The API returns the model version and pipeline version with every prediction, so
   (`load_model`/`predict`/`explain`), `python -m fraud.serving.export` (bundle + model card, `--push` for
   the HF Hub), `demo/app.py`, `demo/build_space.py`. Bundle pushed to the HF Hub model repo; Space deployed
   (ZeroGPU builds on Python 3.12.12, not 3.11; the unused `spaces.GPU` startup probe works but was not tested
-  without). Next: Phase 5 (FastAPI + Next.js, online card-history store so the v2 champion can serve); see
-  `docs/plan.md`.
+  without).
+- Current phase: **Phase 5 — Full-stack app**, in progress. The FastAPI backend is built and its tests pass
+  against a real Postgres: `api/main.py` (`/v1/predict`, `/v1/predict/batch`, `/v1/feedback`, `/v1/model`,
+  `/health`), `api/db.py` + `api/schema.sql` (one table is both the prediction log and the online per-card
+  history store — ADR 0005), `api/deps.py` (API-key auth, `slowapi` rate limiting), `api/config.py`,
+  `api/logging_config.py` (structured JSON logs). The champion (`lightgbm`, v2 features) is exported and
+  pushed to its own HF Hub branch (`fraud.serving.export --alias champion --push`, `MODEL_REVISION=champion`),
+  separate from the demo's `main` branch. Fixed along the way: `write_bundle` couldn't build a v2 bundle's
+  `feature_list.json` (no `card_id` to group by), and Postgres round-tripping `trans_ts` through
+  `TIMESTAMPTZ` produced tz-aware values that broke concatenation with a freshly-submitted naive request row
+  (now `TIMESTAMP`, matching every other timestamp in the project). `api/Dockerfile`,
+  `docker-compose.yml` (local Postgres, port 5433 — 5432 collides with a Postgres already installed on this
+  machine) and `.github/workflows/ci.yml`'s `build-api-image`/`deploy-api` jobs are written but **not yet
+  verified end-to-end**: this machine's C: drive filled up (0 bytes free) mid `docker build`, after dependency
+  resolution had already succeeded — re-run once there's disk space. The Next.js frontend (`web/`, App
+  Router, TypeScript, Tailwind v4) is built: single-transaction form, batch CSV upload/download, model
+  info page, a Phase-6 monitoring placeholder, and an API-key-never-reaches-the-browser design (every
+  call goes through `web/app/api/*` route handlers to the FastAPI backend). `npm run typecheck` and
+  `npm run build` both pass; not yet run against a live backend (Docker crashed before this could be
+  checked end-to-end) or deployed. Render/Neon/Vercel accounts are not yet created (owner setup steps
+  recorded in `docs/infra.md`). See `docs/plan.md` for the full task list.
 - Last completed tag: `v0.4-demo` (Phase 4); earlier: `v0.3-model` (Phase 3), `v0.2-features` (Phase 2),
   `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0)
 

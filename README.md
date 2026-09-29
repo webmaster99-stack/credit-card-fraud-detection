@@ -86,7 +86,7 @@ generalization gap, reported honestly rather than fixed by re-tuning against tes
 
 A Gradio app in `demo/` scores one transaction or a CSV (up to 10,000 rows), explains each score with
 SHAP reasons, and shows which model version answered. All model code lives in `src/fraud/serving/`
-(`load_model`, `predict`, `explain`), which the Phase 5 API will reuse.
+(`load_model`, `predict`, `explain`), which the Phase 5 API also uses.
 
 The demo serves a **stateless v1 model** (registry `fraud-classifier` v3, alias `demo`: xgboost, recall 0.921
 at precision 0.50 on validation), not the champion, because a form has no card history
@@ -103,6 +103,24 @@ uv run python demo/build_space.py                             # stage the Space 
 Live demo: https://huggingface.co/spaces/ilian-hadzhidimitrov/fraud-classifier-demo (free ZeroGPU slot, so it
 may take a moment to wake up; the model itself runs on CPU). Deployment notes: `docs/infra.md`.
 Model card: `docs/model_cards/v0.4-demo.md`.
+
+## Full-stack app (Phase 5, in progress)
+
+Unlike the demo, this serves the actual **champion** (lightgbm on v2, history-aware features) through
+a FastAPI backend (`api/`) with a Postgres-backed online history store, and a Next.js frontend
+(`web/`) that never exposes the API key to the browser. See `docs/adr/0005-api-history-store-and-champion-distribution.md`
+for how the history store and champion distribution are designed, and `docs/infra.md` for the
+remaining Render/Neon/Vercel setup steps (not yet deployed - see "Current status" in `CLAUDE.md`).
+
+```bash
+uv run python -m fraud.serving.export --alias champion --push   # push the champion to its `champion` HF Hub branch
+docker compose up -d db                                          # local Postgres (port 5433)
+uv run uvicorn api.main:app --reload                              # run the API locally (needs DATABASE_URL, API_KEY)
+cd web && npm install && npm run dev                              # run the frontend locally (needs web/.env.local)
+```
+
+API endpoints: `POST /v1/predict`, `POST /v1/predict/batch` (CSV or JSON), `POST /v1/feedback`,
+`GET /v1/model`, `GET /health`. OpenAPI docs at `/docs` once the service is running.
 
 ## What the data looks like
 

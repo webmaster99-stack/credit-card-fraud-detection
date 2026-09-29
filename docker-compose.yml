@@ -1,0 +1,33 @@
+# Local dev/integration-test stack (docs/plan.md Phase 5): `docker compose up`.
+# `db` alone is enough to run the Postgres-backed tests (set TEST_DATABASE_URL to its URL below).
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fraud
+      POSTGRES_PASSWORD: fraud
+      POSTGRES_DB: fraud
+    ports:
+      # Host port 5433, not 5432: avoids colliding with a Postgres already installed locally.
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fraud"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://fraud:fraud@db:5432/fraud
+      API_KEY: ${API_KEY:-dev-api-key}
+      MODEL_SOURCE: ${MODEL_SOURCE:-}
+      MODEL_REVISION: ${MODEL_REVISION:-champion}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+    ports:
+      - "8000:8000"

@@ -114,7 +114,11 @@ def write_bundle(
     out_dir.mkdir(parents=True, exist_ok=True)
     template = template_frame()
     features = pipeline.named_steps["features"]
-    transformed = features.transform(validate_transactions(template))
+    validated = validate_transactions(template)
+    # A v2 (history) pipeline needs a card_id to group by; a placeholder is enough here since this
+    # transform only discovers output column names and dtypes, not real feature values.
+    probe = validated.assign(card_id=[f"template-{i}" for i in range(len(validated))])
+    transformed = features.transform(probe)
     listing = feature_list(features, transformed, metadata["feature_set"])
 
     joblib.dump(pipeline, out_dir / PIPELINE_FILE)

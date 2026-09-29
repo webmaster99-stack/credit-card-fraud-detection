@@ -182,11 +182,23 @@ flowchart LR
 
 **Tasks**
 
-- [ ] FastAPI service in `api/` using `src/fraud/serving/`
-- [ ] Postgres schema for predictions and card history
-- [ ] Dockerfile and CI build/test/deploy to Render
-- [ ] Next.js app in `web/` deployed to Vercel
-- [ ] Integration tests against a local Docker container; OpenAPI docs
+- [x] FastAPI service in `api/` using `src/fraud/serving/` — `main.py` (`/v1/predict`,
+  `/v1/predict/batch`, `/v1/feedback`, `/v1/model`, `/health`), `config.py`, `db.py`, `deps.py`
+  (API key + rate limiting), `logging_config.py` (structured JSON logs), `schemas.py`
+- [x] Postgres schema for predictions and card history — one table doubles as both (ADR 0005);
+  `schema.sql`, created by the app itself at startup, no separate migration step
+- [ ] Dockerfile and CI build/test/deploy to Render — `api/Dockerfile`, `docker-compose.yml`
+  (local dev/test Postgres), `.github/workflows/ci.yml`'s `build-api-image`/`deploy-api` jobs all
+  written; end-to-end `docker build` **not yet verified** (this machine's C: drive filled up
+  mid-build, see `docs/infra.md`); Render/Neon accounts not yet created (owner action, `docs/infra.md`)
+- [ ] Next.js app in `web/` deployed to Vercel — app built (single-transaction form, batch CSV
+  upload/download, model info, monitoring placeholder for Phase 6, a "waking up" banner for
+  Render's free-tier cold start); typechecks and `next build` succeed; API key stays server-side
+  via `app/api/*` route handlers. **Not yet deployed** (no Vercel project yet, owner action)
+- [x] Integration tests against a local Docker container; OpenAPI docs — `tests/test_api_db.py`,
+  `tests/test_api_main.py` run for real against Postgres (`docker-compose.yml`'s `db` service; CI
+  runs them against a Postgres service container) and skip cleanly without one; FastAPI's generated
+  OpenAPI schema checked (`app.openapi()`)
 - [ ] README updated; tag `v1.0`
 
 ## Phase 6 — Monitoring

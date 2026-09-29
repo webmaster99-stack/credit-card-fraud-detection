@@ -1,7 +1,15 @@
+import os
+
 import pandas as pd
 import pytest
 
 from fraud.params import load_params
+
+# api.main builds its FastAPI app (routes only, no I/O) at import time, which needs these two
+# settings present; a dummy DATABASE_URL is enough for import and for tests that don't touch a
+# real database. Set with setdefault so a real .env or CI environment always wins.
+os.environ.setdefault("DATABASE_URL", "postgresql://fraud:fraud@localhost:5432/fraud_test")
+os.environ.setdefault("API_KEY", "test-api-key")
 
 
 def make_raw(n: int = 6) -> pd.DataFrame:
@@ -147,3 +155,91 @@ def bundle_dir(tmp_path_factory: pytest.TempPathFactory):
         cities=build_cities(df),
         examples=examples,
     )
+
+
+CHAMPION_MODEL_CFG = {
+    "step": "xgboost",
+    "feature_set": "v2",
+    "hyperparams": {"n_estimators": 20, "max_depth": 3},
+    "calibration": "sigmoid",
+    "min_precision": 0.5,
+}
+
+
+@pytest.fixture(scope="session")
+def bundle_dir_v2(tmp_path_factory: pytest.TempPathFactory):
+    """A tiny but complete v2 (stateful) bundle: the API tests' stand-in for the champion."""
+    from fraud.models.train import fit_champion_candidate
+    from fraud.serving import write_bundle
+    from fraud.serving.export import EXAMPLE_COLUMNS, build_cities
+
+    params = load_params()
+    df = make_clean_frame(n=600, cards=12)
+    train, valid = df.iloc[:400].reset_index(drop=True), df.iloc[400:].reset_index(drop=True)
+    pipeline, metrics = fit_champion_candidate(
+        train, valid, CHAMPION_MODEL_CFG, params["features"], seed=params["seed"]
+    )
+    metadata = {
+        "model_name": "fraud-classifier",
+        "model_version": "test-2",
+        "alias": "champion",
+        "pipeline_version": "features-test",
+        "feature_set": "v2",
+        "step": "xgboost",
+        "calibration": "sigmoid",
+        "threshold": metrics["threshold"],
+        "min_precision": 0.5,
+        "dataset_name": "sparkov",
+        "dataset_version": "v1",
+        "split_spec": "test split",
+        "git_commit": "abc1234",
+        "validation": {"precision": metrics["precision"], "recall": metrics["recall"]},
+    }
+    examples = valid.groupby("is_fraud").head(3)[EXAMPLE_COLUMNS].reset_index(drop=True)
+    return write_bundle(
+        tmp_path_factory.mktemp("bundle_v2"),
+        pipeline,
+        metadata,
+        model_card="# test card (v2)\n",
+        cities=build_cities(df),
+        examples=examples,
+    )
+
+
+@pytest.fixture(scope="session")
+def database_url() -> str | None:
+    return os.environ.get("TEST_DATABASE_URL") or os.environ.get("CI_DATABASE_URL")
+
+
+@pytest.fixture(scope="session")
+def pg_pool(database_url: str | None):
+    """A real connection pool against a throwaway Postgres, or a clean pytest.skip.
+
+    Set TEST_DATABASE_URL (or CI_DATABASE_URL) to a scratch database to run the tests that need
+    it; `docker-compose.yml` at the repo root starts one for local use.
+    """
+    if not database_url:
+        pytest.skip("No TEST_DATABASE_URL set; skipping Postgres-backed tests.")
+    import psycopg
+    from api.db import close_pool, init_schema, open_pool
+
+    try:
+        with psycopg.connect(database_url, connect_timeout=2):
+            pass
+    except Exception as exc:  # pragma: no cover - environment-dependent
+        pytest.skip(f"Postgres at TEST_DATABASE_URL is not reachable: {exc}")
+
+    pool = open_pool(database_url, min_size=1, max_size=2)
+    init_schema(pool)
+    yield pool
+    with pool.connection() as conn:
+        conn.execute("TRUNCATE predictions")
+    close_pool(pool)
+
+
+@pytest.fixture
+def clean_predictions(pg_pool):
+    """Empties `predictions` before a test that needs a known-empty table."""
+    with pg_pool.connection() as conn:
+        conn.execute("TRUNCATE predictions")
+    return pg_pool
