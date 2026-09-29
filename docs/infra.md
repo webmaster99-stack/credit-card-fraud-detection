@@ -53,11 +53,11 @@ any of them. Everything must stay rebuildable from git + DVC in case a free tier
 - Vercel monthly bandwidth/invocation allotments and Render outbound bandwidth allotments were not
   stated on the pages consulted. Look them up before Phase 5.
 
-## Phase 5 setup (owner action required)
+## Phase 5 setup (Neon and Render done; Vercel pending)
 
 The API (`api/`) and its tests are built and pass against a real Postgres (verified locally via
-`docker-compose.yml`'s `db` service - see ADR 0005). Three accounts still need to be created by hand
-before the service is actually live; none of this can be done from the repo alone.
+`docker-compose.yml`'s `db` service - see ADR 0005). Neon and Render are set up and the API is live
+(see "Deployed state" below); the Vercel frontend is still to do.
 
 1. **Neon**: create a project, copy its connection string into `DATABASE_URL` (a GitHub secret for
    CI/deploy, and a Render environment variable for the running service). `api/db.py`'s
@@ -80,8 +80,47 @@ before the service is actually live; none of this can be done from the repo alon
    `FRAUD_API_KEY` (the same value as the API's `API_KEY`). The app is built and passes `next build`
    locally (`web/package.json`); no code changes should be needed to deploy it as-is.
 
-**Not yet done, blocked on this machine's C: drive being full (0 bytes free, 2026-09-29):** building
-`api/Dockerfile` end-to-end with `docker build`. The dependency resolution ran correctly (confirmed:
-uv resolved and started downloading all ~260 packages without error) before Docker Desktop's own
-storage went read-only and crashed. Re-run `docker compose up --build` once there's disk space, to
-confirm the image actually builds and serves before relying on Render to build the same Dockerfile.
+### Deployed state (2026-09-29)
+
+Steps 1-3 are done. The API is live on Render and `GET /health` returns
+`{"status":"ok","model_loaded":true,"database_ok":true}`.
+
+| Piece | Value |
+| --- | --- |
+| Render service | `credit-card-fraud-detection` (free plan, Frankfurt, Docker runtime, `api/Dockerfile`, root `.`) |
+| URL | `https://credit-card-fraud-detection-5reg.onrender.com` |
+| Postgres | Neon, pooled endpoint (`-pooler`), `sslmode=require&channel_binding=require` |
+| Env vars set | `DATABASE_URL`, `API_KEY`, `MODEL_REVISION=champion` |
+| Env vars not set | `ALLOWED_ORIGINS` (defaults to `http://localhost:3000`; set it to the Vercel URL once step 5 is done, or browser calls fail CORS) |
+| Auto-deploy | **On** (every push to `main` deploys). Step 2 above says to turn it off so `deploy-api` deploys on `v*` tags; that has not been done, and `RENDER_DEPLOY_HOOK_URL` is not configured. |
+| Vercel | Not created yet (step 5) |
+
+The Docker build was first verified by Render itself, not locally (the local `docker build` was blocked
+by a full C: drive). Getting it to serve took three fixes to `api/Dockerfile` and the package, all in
+the `main` history:
+
+1. **`README.md` must be in the image.** `pyproject.toml` declares `readme = "README.md"`, and the
+   second `uv sync` builds the project with hatchling, which fails without it.
+2. **`params.yaml` must be in the image, and `FRAUD_PARAMS_PATH` must point at it.** The API installs
+   `fraud` non-editably into site-packages, so `REPO_ROOT / "params.yaml"` resolves inside the venv and
+   does not exist. `fraud.params` reads `FRAUD_PARAMS_PATH` first; the image sets it to
+   `/app/params.yaml`.
+3. **`libgomp1` must be installed.** `python:3.11-slim` lacks the OpenMP runtime LightGBM and XGBoost
+   load at import (`OSError: libgomp.so.1`).
+
+Operational notes:
+
+- **Neon drops idle connections.** With scale-to-zero, a pooled connection can be closed while the
+  service is idle, and `/health` then returned 503 with `database_ok: false` (log line
+  `psycopg.pool: discarding closed connection [BAD]`). `api/db.py:open_pool` now passes
+  `check=ConnectionPool.check_connection` and `max_idle=60`, so a dead connection is replaced when it
+  is handed out. After a long idle, `/health` should still return 200; re-check that.
+- **Secrets in logs.** A settings validation error prints the raw input values, including `API_KEY`,
+  into Render's logs (happened once, when `DATABASE_URL` was missing). Rotate `API_KEY` (in Render and
+  in Vercel's `FRAUD_API_KEY`) and stop pydantic from echoing input values.
+- The Neon connection string was pasted into a chat session; rotate the Neon password if that matters.
+- Render reports "No open ports detected" for the first minute or two of a start while the model
+  downloads from Hugging Face, then detects port 8000 and restarts the deploy once. That is normal
+  here.
+- The local `docker compose up --build` check of `api/Dockerfile` is still worth doing once the C:
+  drive has space, but it is no longer blocking.

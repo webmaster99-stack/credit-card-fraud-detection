@@ -48,7 +48,7 @@ This is a portfolio project, built to the standard of a system that could suppor
 
 ## Common commands
 
-**Working now:** `uv sync`, `dvc pull`/`dvc push`, `dvc repro` (ingest, clean, split, features, train, train_demo, evaluate), `pytest`, `ruff`, `mypy`, `pre-commit`, the Gradio demo (`FRAUD_MODEL_SOURCE=data/bundle uv run python demo/app.py`, after `uv run python -m fraud.serving.export`), `uv run python demo/build_space.py` to stage the Space folder, and the `uvicorn` entry point (`api/`, Phase 5) locally against `docker-compose.yml`'s Postgres (needs `DATABASE_URL`, `API_KEY` in `.env`; not yet deployed to Render — `docs/infra.md`). **Planned, not yet working:** the Next.js frontend (`web/`). Run `dvc` through `uv run dvc ...` unless the venv is activated. `dvc repro ingest` needs a Kaggle token (`KAGGLE_API_TOKEN` or `KAGGLE_ACCESS_TOKEN` in `.env`).
+**Working now:** `uv sync`, `dvc pull`/`dvc push`, `dvc repro` (ingest, clean, split, features, train, train_demo, evaluate), `pytest`, `ruff`, `mypy`, `pre-commit`, the Gradio demo (`FRAUD_MODEL_SOURCE=data/bundle uv run python demo/app.py`, after `uv run python -m fraud.serving.export`), `uv run python demo/build_space.py` to stage the Space folder, and the `uvicorn` entry point (`api/`, Phase 5) locally against `docker-compose.yml`'s Postgres (needs `DATABASE_URL`, `API_KEY` in `.env`; deployed to Render with Neon — `docs/infra.md`). **Planned, not yet working:** the Next.js frontend (`web/`). Run `dvc` through `uv run dvc ...` unless the venv is activated. `dvc repro ingest` needs a Kaggle token (`KAGGLE_API_TOKEN` or `KAGGLE_ACCESS_TOKEN` in `.env`).
 
 ```bash
 uv sync                      # install locked dependencies
@@ -188,17 +188,24 @@ The API returns the model version and pipeline version with every prediction, so
   separate from the demo's `main` branch. Fixed along the way: `write_bundle` couldn't build a v2 bundle's
   `feature_list.json` (no `card_id` to group by), and Postgres round-tripping `trans_ts` through
   `TIMESTAMPTZ` produced tz-aware values that broke concatenation with a freshly-submitted naive request row
-  (now `TIMESTAMP`, matching every other timestamp in the project). `api/Dockerfile`,
-  `docker-compose.yml` (local Postgres, port 5433 — 5432 collides with a Postgres already installed on this
-  machine) and `.github/workflows/ci.yml`'s `build-api-image`/`deploy-api` jobs are written but **not yet
-  verified end-to-end**: this machine's C: drive filled up (0 bytes free) mid `docker build`, after dependency
-  resolution had already succeeded — re-run once there's disk space. The Next.js frontend (`web/`, App
-  Router, TypeScript, Tailwind v4) is built: single-transaction form, batch CSV upload/download, model
-  info page, a Phase-6 monitoring placeholder, and an API-key-never-reaches-the-browser design (every
-  call goes through `web/app/api/*` route handlers to the FastAPI backend). `npm run typecheck` and
-  `npm run build` both pass; not yet run against a live backend (Docker crashed before this could be
-  checked end-to-end) or deployed. Render/Neon/Vercel accounts are not yet created (owner setup steps
-  recorded in `docs/infra.md`). See `docs/plan.md` for the full task list.
+  (now `TIMESTAMP`, matching every other timestamp in the project). `docker-compose.yml`
+  (local Postgres, port 5433 — 5432 collides with a Postgres already installed on this machine) and
+  `.github/workflows/ci.yml`'s `build-api-image`/`deploy-api` jobs are written; the CI jobs are not yet
+  exercised. **The API is deployed and live on Render** (2026-09-29; free plan, Docker runtime) at
+  `https://credit-card-fraud-detection-5reg.onrender.com`, backed by Neon Postgres, and `/health` returns
+  `ok` with the champion model loaded. Getting the image to serve needed three fixes, recorded with the
+  rest of the deployed state in `docs/infra.md`: `README.md` and `params.yaml` copied into the image
+  (`FRAUD_PARAMS_PATH` points `fraud.params` at the latter, because the non-editable install has no
+  repo root), `libgomp1` installed, and the Postgres pool validating connections on checkout
+  (`check_connection`) because Neon drops idle ones. Still open: Render auto-deploy is on (the docs planned
+  tag-only deploys via `RENDER_DEPLOY_HOOK_URL`); `ALLOWED_ORIGINS` is unset (default localhost); `API_KEY`
+  leaked into Render logs once and should be rotated; the local `docker build` was never run (C: drive was
+  full). The Next.js frontend (`web/`, App Router, TypeScript, Tailwind v4) is built: single-transaction
+  form, batch CSV upload/download, model info page, a Phase-6 monitoring placeholder, and an
+  API-key-never-reaches-the-browser design (every call goes through `web/app/api/*` route handlers to the
+  FastAPI backend). `npm run typecheck` and `npm run build` both pass; not yet run against the live backend
+  or deployed — the Vercel account/project is the next owner step (`docs/infra.md`). See `docs/plan.md`
+  for the full task list.
 - Last completed tag: `v0.4-demo` (Phase 4); earlier: `v0.3-model` (Phase 3), `v0.2-features` (Phase 2),
   `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0)
 
