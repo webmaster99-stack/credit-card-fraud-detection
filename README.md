@@ -8,7 +8,8 @@ Status: Phase 3 (modeling experiments) complete, tag `v0.3-model`. Champion: Lig
 (card-history) features, recall 0.986 at precision 0.446 on the single test-set evaluation — see
 Modeling, below. Earlier: `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0).
 Phase 4 (Gradio demo) complete, tag `v0.4-demo`: the Space is live (link below) and serves a
-stateless v1 model, not the champion (see Demo).
+stateless v1 model, not the champion (see Demo). Phase 5 (full-stack app) complete, tag `v1.0`: a
+Next.js frontend on Vercel and a FastAPI backend on Render serve the champion (see Full-stack app).
 
 ## Setup
 
@@ -104,13 +105,19 @@ Live demo: https://huggingface.co/spaces/ilian-hadzhidimitrov/fraud-classifier-d
 may take a moment to wake up; the model itself runs on CPU). Deployment notes: `docs/infra.md`.
 Model card: `docs/model_cards/v0.4-demo.md`.
 
-## Full-stack app (Phase 5, in progress)
+## Full-stack app (Phase 5)
 
 Unlike the demo, this serves the actual **champion** (lightgbm on v2, history-aware features) through
 a FastAPI backend (`api/`) with a Postgres-backed online history store, and a Next.js frontend
 (`web/`) that never exposes the API key to the browser. See `docs/adr/0005-api-history-store-and-champion-distribution.md`
 for how the history store and champion distribution are designed, and `docs/infra.md` for the
-remaining Render/Neon/Vercel setup steps (not yet deployed - see "Current status" in `CLAUDE.md`).
+deployed state, the fixes it took to get the image serving, and the free-tier caveats.
+
+- Frontend (Vercel): https://fraud-classifier-web.vercel.app
+- API (Render, free tier): https://credit-card-fraud-detection-5reg.onrender.com (`/health` is public; every
+  `/v1/*` route needs the `X-API-Key` header). Free services sleep when idle, so the first request after a
+  quiet period is slow; the frontend shows a "waking up" banner.
+- Model card: `docs/model_cards/v1.0-api.md`. The API deploys from CI when a `v*` tag is pushed.
 
 ```bash
 uv run python -m fraud.serving.export --alias champion --push   # push the champion to its `champion` HF Hub branch
@@ -137,6 +144,7 @@ should be read with that in mind. A real-data benchmark (ULB) is planned for Pha
 - Experiments, data and mirror: https://dagshub.com/webmaster99-stack/credit-card-fraud-detection
 - Model repo: https://huggingface.co/ilian-hadzhidimitrov/fraud-classifier
 - Demo (Gradio Space): https://huggingface.co/spaces/ilian-hadzhidimitrov/fraud-classifier-demo
+- Full-stack frontend (Vercel): https://fraud-classifier-web.vercel.app
 - Free-tier limits and infra decisions: `docs/infra.md`
 - Design decisions: `docs/adr/`
 - Model cards: `docs/model_cards/v0.3-model.md` (champion), `docs/model_cards/v0.4-demo.md` (demo model)

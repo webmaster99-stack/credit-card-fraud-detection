@@ -91,9 +91,9 @@ Steps 1-3 are done. The API is live on Render and `GET /health` returns
 | URL | `https://credit-card-fraud-detection-5reg.onrender.com` |
 | Postgres | Neon, pooled endpoint (`-pooler`), `sslmode=require&channel_binding=require` |
 | Env vars set | `DATABASE_URL`, `API_KEY`, `MODEL_REVISION=champion` |
-| Env vars not set | `ALLOWED_ORIGINS` (defaults to `http://localhost:3000`; set it to the Vercel URL once step 5 is done, or browser calls fail CORS) |
+| Env vars not set | `ALLOWED_ORIGINS` (defaults to `http://localhost:3000`). Browsers never call the API directly (every call goes through the Next.js route handlers on the server), so CORS does not block the frontend; set it to the Vercel URL only if a browser client ever calls the API itself. |
 | Deploys | Render auto-deploy is off; `deploy-api` in `ci.yml` fires the `RENDER_DEPLOY_HOOK_URL` secret's hook on `v*` tag pushes, after tests and the image build pass. |
-| Vercel | Not created yet (step 5) |
+| Vercel | Project `fraud-classifier-web`, https://fraud-classifier-web.vercel.app (step 5 done). Server-side env vars `FRAUD_API_URL` and `FRAUD_API_KEY` on Production and Preview. `FRAUD_API_KEY` must equal Render's `API_KEY`; it was stale after the key rotation and was updated by the owner. |
 
 The Docker build was first verified by Render itself, not locally (the local `docker build` was blocked
 by a full C: drive). Getting it to serve took three fixes to `api/Dockerfile` and the package, all in
@@ -116,8 +116,9 @@ Operational notes:
   `check=ConnectionPool.check_connection` and `max_idle=60`, so a dead connection is replaced when it
   is handed out. After a long idle, `/health` should still return 200; re-check that.
 - **Secrets in logs.** A settings validation error prints the raw input values, including `API_KEY`,
-  into Render's logs (happened once, when `DATABASE_URL` was missing). Rotate `API_KEY` (in Render and
-  in Vercel's `FRAUD_API_KEY`) and stop pydantic from echoing input values.
+  into Render's logs (happened once, when `DATABASE_URL` was missing). `API_KEY` was rotated afterwards
+  (2026-09-29, in Render and in Vercel's `FRAUD_API_KEY`). Still open: stop pydantic from echoing input
+  values in that error.
 - The Neon connection string was pasted into a chat session; rotate the Neon password if that matters.
 - Render reports "No open ports detected" for the first minute or two of a start while the model
   downloads from Hugging Face, then detects port 8000 and restarts the deploy once. That is normal

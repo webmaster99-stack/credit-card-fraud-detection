@@ -48,7 +48,7 @@ This is a portfolio project, built to the standard of a system that could suppor
 
 ## Common commands
 
-**Working now:** `uv sync`, `dvc pull`/`dvc push`, `dvc repro` (ingest, clean, split, features, train, train_demo, evaluate), `pytest`, `ruff`, `mypy`, `pre-commit`, the Gradio demo (`FRAUD_MODEL_SOURCE=data/bundle uv run python demo/app.py`, after `uv run python -m fraud.serving.export`), `uv run python demo/build_space.py` to stage the Space folder, and the `uvicorn` entry point (`api/`, Phase 5) locally against `docker-compose.yml`'s Postgres (needs `DATABASE_URL`, `API_KEY` in `.env`; deployed to Render with Neon — `docs/infra.md`). **Planned, not yet working:** the Next.js frontend (`web/`). Run `dvc` through `uv run dvc ...` unless the venv is activated. `dvc repro ingest` needs a Kaggle token (`KAGGLE_API_TOKEN` or `KAGGLE_ACCESS_TOKEN` in `.env`).
+**Working now:** `uv sync`, `dvc pull`/`dvc push`, `dvc repro` (ingest, clean, split, features, train, train_demo, evaluate), `pytest`, `ruff`, `mypy`, `pre-commit`, the Gradio demo (`FRAUD_MODEL_SOURCE=data/bundle uv run python demo/app.py`, after `uv run python -m fraud.serving.export`), `uv run python demo/build_space.py` to stage the Space folder, and the `uvicorn` entry point (`api/`, Phase 5) locally against `docker-compose.yml`'s Postgres (needs `DATABASE_URL`, `API_KEY` in `.env`; deployed to Render with Neon — `docs/infra.md`). The Next.js frontend (`web/`, `cd web && npm run dev`, needs `web/.env.local`; deployed to Vercel). Run `dvc` through `uv run dvc ...` unless the venv is activated. `dvc repro ingest` needs a Kaggle token (`KAGGLE_API_TOKEN` or `KAGGLE_ACCESS_TOKEN` in `.env`).
 
 ```bash
 uv sync                      # install locked dependencies
@@ -179,35 +179,35 @@ The API returns the model version and pipeline version with every prediction, so
   the HF Hub), `demo/app.py`, `demo/build_space.py`. Bundle pushed to the HF Hub model repo; Space deployed
   (ZeroGPU builds on Python 3.12.12, not 3.11; the unused `spaces.GPU` startup probe works but was not tested
   without).
-- Current phase: **Phase 5 — Full-stack app**, in progress. The FastAPI backend is built and its tests pass
-  against a real Postgres: `api/main.py` (`/v1/predict`, `/v1/predict/batch`, `/v1/feedback`, `/v1/model`,
-  `/health`), `api/db.py` + `api/schema.sql` (one table is both the prediction log and the online per-card
-  history store — ADR 0005), `api/deps.py` (API-key auth, `slowapi` rate limiting), `api/config.py`,
-  `api/logging_config.py` (structured JSON logs). The champion (`lightgbm`, v2 features) is exported and
-  pushed to its own HF Hub branch (`fraud.serving.export --alias champion --push`, `MODEL_REVISION=champion`),
-  separate from the demo's `main` branch. Fixed along the way: `write_bundle` couldn't build a v2 bundle's
-  `feature_list.json` (no `card_id` to group by), and Postgres round-tripping `trans_ts` through
-  `TIMESTAMPTZ` produced tz-aware values that broke concatenation with a freshly-submitted naive request row
-  (now `TIMESTAMP`, matching every other timestamp in the project). `docker-compose.yml`
-  (local Postgres, port 5433 — 5432 collides with a Postgres already installed on this machine) and
-  `.github/workflows/ci.yml`'s `build-api-image`/`deploy-api` jobs are written; the CI jobs are not yet
-  exercised. **The API is deployed and live on Render** (2026-09-29; free plan, Docker runtime) at
-  `https://credit-card-fraud-detection-5reg.onrender.com`, backed by Neon Postgres, and `/health` returns
-  `ok` with the champion model loaded. Getting the image to serve needed three fixes, recorded with the
-  rest of the deployed state in `docs/infra.md`: `README.md` and `params.yaml` copied into the image
-  (`FRAUD_PARAMS_PATH` points `fraud.params` at the latter, because the non-editable install has no
-  repo root), `libgomp1` installed, and the Postgres pool validating connections on checkout
-  (`check_connection`) because Neon drops idle ones. Render auto-deploy is off; CI deploys on `v*` tag pushes via
-  `RENDER_DEPLOY_HOOK_URL` (untested until the next tag). Still open: `ALLOWED_ORIGINS` is unset (default
-  localhost); `API_KEY` leaked into Render logs once and should be rotated; the local `docker build` was never run (C: drive was
-  full). The Next.js frontend (`web/`, App Router, TypeScript, Tailwind v4) is built: single-transaction
-  form, batch CSV upload/download, model info page, a Phase-6 monitoring placeholder, and an
-  API-key-never-reaches-the-browser design (every call goes through `web/app/api/*` route handlers to the
-  FastAPI backend). `npm run typecheck` and `npm run build` both pass; not yet run against the live backend
-  or deployed — the Vercel account/project is the next owner step (`docs/infra.md`). See `docs/plan.md`
-  for the full task list.
-- Last completed tag: `v0.4-demo` (Phase 4); earlier: `v0.3-model` (Phase 3), `v0.2-features` (Phase 2),
-  `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0)
+- Current phase: **Phase 5 — Full-stack app** complete, tag `v1.0`. The FastAPI backend (`api/`:
+  `/v1/predict`, `/v1/predict/batch`, `/v1/feedback`, `/v1/model`, `/health`; `db.py` + `schema.sql` where one
+  table is both the prediction log and the online per-card history store — ADR 0005; API-key auth,
+  `slowapi` rate limiting, structured JSON logs) serves the champion (`lightgbm`, v2 features, pushed to its own
+  HF Hub branch via `fraud.serving.export --alias champion --push`, `MODEL_REVISION=champion`), and its tests
+  pass against a real Postgres. **Live on Render** (free plan, Docker runtime) at
+  `https://credit-card-fraud-detection-5reg.onrender.com`, backed by Neon Postgres; the Next.js frontend
+  (`web/`) is live on Vercel as `fraud-classifier-web` (https://fraud-classifier-web.vercel.app), with every
+  call going through `web/app/api/*` route handlers so the API key never reaches the browser. Verified:
+  `/health`, `/v1/model`, `/v1/predict` and `/v1/predict/batch` (JSON and CSV) against the live API with the
+  rotated `API_KEY`, and the frontend's model info page (owner-confirmed). Getting the image to serve
+  needed three fixes (`docs/infra.md`): `README.md` and `params.yaml` copied into the image
+  (`FRAUD_PARAMS_PATH` points `fraud.params` at the latter, because the non-editable install has no repo
+  root), `libgomp1` installed, and the Postgres pool validating connections on checkout
+  (`check_connection`) because Neon drops idle ones. Render auto-deploy is off; CI deploys on `v*` tag
+  pushes via `RENDER_DEPLOY_HOOK_URL`, first exercised by the `v1.0` tag. Earlier fixes: `write_bundle`
+  couldn't build a v2 bundle's `feature_list.json`, and `trans_ts` round-tripped through `TIMESTAMPTZ`
+  broke concatenation with naive request rows (now `TIMESTAMP`). Known gaps, carried forward:
+  the champion's decision threshold is very low (0.000305) and the ordinary test transaction scored just
+  under it, worth revisiting given test precision 0.446; the served `pipeline_version` reads
+  `features-1.0.0` for the v2 feature set, so the version was probably never bumped for the v2 features;
+  `/v1/feedback` and the frontend's predict and batch pages were not exercised end-to-end; the local
+  `docker build` was never run (C: drive was full; CI and Render build the same Dockerfile);
+  `ALLOWED_ORIGINS` is still the localhost default (browsers never call the API directly). See
+  `docs/plan.md` for the task list.
+- Next: **Phase 6 — Monitoring** (Evidently jobs, drift replay, the monitoring page); read its section of
+  `docs/plan.md` first.
+- Last completed tag: `v1.0` (Phase 5); earlier: `v0.4-demo` (Phase 4), `v0.3-model` (Phase 3),
+  `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0)
 
 Update this section as work progresses.
 

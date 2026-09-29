@@ -187,19 +187,22 @@ flowchart LR
   (API key + rate limiting), `logging_config.py` (structured JSON logs), `schemas.py`
 - [x] Postgres schema for predictions and card history — one table doubles as both (ADR 0005);
   `schema.sql`, created by the app itself at startup, no separate migration step
-- [ ] Dockerfile and CI build/test/deploy to Render — `api/Dockerfile`, `docker-compose.yml`
-  (local dev/test Postgres), `.github/workflows/ci.yml`'s `build-api-image`/`deploy-api` jobs all
-  written; end-to-end `docker build` **not yet verified** (this machine's C: drive filled up
-  mid-build, see `docs/infra.md`); Render/Neon accounts not yet created (owner action, `docs/infra.md`)
-- [ ] Next.js app in `web/` deployed to Vercel — app built (single-transaction form, batch CSV
-  upload/download, model info, monitoring placeholder for Phase 6, a "waking up" banner for
-  Render's free-tier cold start); typechecks and `next build` succeed; API key stays server-side
-  via `app/api/*` route handlers. **Not yet deployed** (no Vercel project yet, owner action)
+- [x] Dockerfile and CI build/test/deploy to Render — `api/Dockerfile`, `docker-compose.yml`
+  (local dev/test Postgres), `.github/workflows/ci.yml`'s `build-api-image`/`deploy-api` jobs. The
+  image builds in CI and on Render, and the API is live on Render with Neon Postgres (2026-09-29,
+  `docs/infra.md`). Render auto-deploy is off; `deploy-api` fires the deploy hook on `v*` tags (first
+  exercised by the Phase 5 tag). The local `docker build` was never run (C: drive was full); CI and
+  Render both build the same Dockerfile.
+- [x] Next.js app in `web/` deployed to Vercel — single-transaction form, batch CSV upload/download,
+  model info, monitoring placeholder for Phase 6, a "waking up" banner for Render's free-tier cold
+  start; API key stays server-side via `app/api/*` route handlers. Deployed as
+  `fraud-classifier-web` (https://fraud-classifier-web.vercel.app); the model info page loads the
+  champion from the live API (owner-confirmed)
 - [x] Integration tests against a local Docker container; OpenAPI docs — `tests/test_api_db.py`,
   `tests/test_api_main.py` run for real against Postgres (`docker-compose.yml`'s `db` service; CI
   runs them against a Postgres service container) and skip cleanly without one; FastAPI's generated
   OpenAPI schema checked (`app.openapi()`)
-- [ ] README updated; tag `v1.0`
+- [x] README updated; tag `v1.0`
 
 ## Phase 6 — Monitoring
 
