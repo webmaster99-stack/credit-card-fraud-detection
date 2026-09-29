@@ -144,7 +144,7 @@ function Replay({ report }: { report: MonitoringReport<ReplaySummary> }) {
         {new Date(report.created_at).toUTCString()}:{" "}
         <strong>
           {s.shift
-            ? `shifted run (${s.shift.category} amounts x${s.shift.amount_factor})`
+            ? `shifted run (${s.shift.category ?? "all"} amounts x${s.shift.amount_factor})`
             : "clean run"}
         </strong>
         , {s.n_rows} rows from the {s.split} split. {s.n_drifted} feature(s) drifted; flag rate{" "}

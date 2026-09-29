@@ -9,7 +9,8 @@ Status: Phase 3 (modeling experiments) complete, tag `v0.3-model`. Champion: Lig
 Modeling, below. Earlier: `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0).
 Phase 4 (Gradio demo) complete, tag `v0.4-demo`: the Space is live (link below) and serves a
 stateless v1 model, not the champion (see Demo). Phase 5 (full-stack app) complete, tag `v1.0`: a
-Next.js frontend on Vercel and a FastAPI backend on Render serve the champion (see Full-stack app).
+Next.js frontend on Vercel and a FastAPI backend on Render serve the champion (see Full-stack app). Phase 6 (monitoring) complete, tag `v1.1-monitoring`
+(see Monitoring).
 
 ## Setup
 
@@ -127,7 +128,20 @@ cd web && npm install && npm run dev                              # run the fron
 ```
 
 API endpoints: `POST /v1/predict`, `POST /v1/predict/batch` (CSV or JSON), `POST /v1/feedback`,
-`GET /v1/model`, `GET /health`. OpenAPI docs at `/docs` once the service is running.
+`GET /v1/model`, `GET /v1/monitoring/{nightly,replay}`, `GET /health`. OpenAPI docs at `/docs` once
+the service is running.
+
+## Monitoring (Phase 6)
+
+A scheduled GitHub Action (`.github/workflows/monitoring.yml`, `python -m monitoring.nightly`)
+reads the API's prediction log and request log from Postgres and checks five layers: service error
+rate, invalid-input rate, input drift (PSI against a validation-split reference), flag-rate drift,
+and recall on labelled predictions. Thresholds are in `params.yaml` under `monitoring`; the run
+fails when an alert fires. Results and an Evidently report show on the web app's `/monitoring` page.
+`python -m monitoring.replay [--shift]` replays held-out rows through the live API, with and
+without injected amount drift. `docs/runbook.md` covers alerts and retraining; design in ADR 0006.
+Limits: the replay's rows stay in the prediction log, and performance monitoring needs labels
+posted to `/v1/feedback`.
 
 ## What the data looks like
 

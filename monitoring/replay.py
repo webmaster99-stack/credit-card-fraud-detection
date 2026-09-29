@@ -1,7 +1,7 @@
 """Drift replay demo: push held-out months through the live API, then again with injected shift.
 
     uv run python -m monitoring.replay --rows 300            # clean replay, labels posted late
-    uv run python -m monitoring.replay --rows 300 --shift    # inflated amounts in one category
+    uv run python -m monitoring.replay --rows 300 --shift    # all amounts x3
 
 Needs API_URL and API_KEY (the live service), DATABASE_URL (to store the result) and the held-out
 split from `dvc pull` (`data/processed/<split>.parquet`, default `test`; scoring it here is
@@ -37,10 +37,18 @@ FEEDBACK_INTERVAL_S = 1.1
 BATCH_CHUNK = 200
 
 
-def inject_shift(rows: pd.DataFrame, category: str, factor: float) -> pd.DataFrame:
-    """Inflate the amount of every ``category`` transaction by ``factor``."""
+def inject_shift(rows: pd.DataFrame, category: str | None, factor: float) -> pd.DataFrame:
+    """Inflate amounts by ``factor``: every row, or only those in ``category`` if given.
+
+    A single-category shift is subtle: a small, already-expensive category moves the overall
+    amount distribution very little, so it may stay under the PSI alert threshold.
+    """
     shifted = rows.copy()
-    mask = shifted["category"] == category
+    mask = (
+        pd.Series(True, index=shifted.index)
+        if category is None
+        else shifted["category"] == category
+    )
     shifted.loc[mask, "amt"] = shifted.loc[mask, "amt"] * factor
     return shifted
 
@@ -110,14 +118,15 @@ def main() -> None:
     parser.add_argument("--fraud-share", type=float, default=0.1)
     parser.add_argument("--label-delay", type=float, default=30.0, help="seconds before labels")
     parser.add_argument("--shift", action="store_true", help="inject the covariate shift")
-    parser.add_argument("--shift-category", default="shopping_net")
-    parser.add_argument("--shift-factor", type=float, default=4.0)
+    parser.add_argument("--shift-category", default=None, help="shift only this category")
+    parser.add_argument("--shift-factor", type=float, default=3.0)
     args = parser.parse_args()
 
     load_dotenv(REPO_ROOT / ".env")
     params = load_params()
     cfg = params["monitoring"]
     split = pd.read_parquet(PROCESSED_DIR / f"{args.split}.parquet")
+    split["is_fraud"] = split["is_fraud"].astype(bool)
     rows = sample_rows(split, args.rows, args.fraud_share, int(params["seed"]))
     if args.shift:
         rows = inject_shift(rows, args.shift_category, args.shift_factor)

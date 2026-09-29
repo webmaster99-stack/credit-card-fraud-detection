@@ -138,7 +138,7 @@ export interface NightlySummary {
 export interface ReplaySummary {
   n_rows: number;
   split: string;
-  shift: { category: string; amount_factor: number } | null;
+  shift: { category: string | null; amount_factor: number } | null;
   features: FeatureDrift[];
   n_drifted: number;
   flag: FlagStatus;

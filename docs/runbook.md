@@ -47,7 +47,7 @@ Retrain when drift is real and persistent, or when performance alerts with trust
 
 ```bash
 uv run python -m monitoring.replay --rows 300            # clean: expect no drifted features
-uv run python -m monitoring.replay --rows 300 --shift    # shopping_net amounts x4: amt drifts
+uv run python -m monitoring.replay --rows 300 --shift    # all amounts x3: amt drifts
 ```
 
 Needs `API_URL`, `API_KEY`, `DATABASE_URL` in `.env` and `dvc pull` of `data/processed/test.parquet`

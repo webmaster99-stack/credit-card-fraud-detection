@@ -204,9 +204,15 @@ The API returns the model version and pipeline version with every prediction, so
   `docker build` was never run (C: drive was full; CI and Render build the same Dockerfile);
   `ALLOWED_ORIGINS` is still the localhost default (browsers never call the API directly). See
   `docs/plan.md` for the task list.
-- Next: **Phase 6 — Monitoring** (Evidently jobs, drift replay, the monitoring page); read its section of
-  `docs/plan.md` first.
-- Last completed tag: `v1.0` (Phase 5); earlier: `v0.4-demo` (Phase 4), `v0.3-model` (Phase 3),
+- Current phase: **Phase 6 — Monitoring** complete, tag `v1.1-monitoring`. `src/fraud/monitoring/`
+  (PSI/Wasserstein/alert logic, thresholds in `params.yaml`), nightly GitHub Action
+  (`monitoring/nightly.py`, fails on alert), `monitoring/replay.py`, `monitoring_reference` dvc stage,
+  `/v1/monitoring/*` endpoints, web `/monitoring` page, `docs/runbook.md`, ADR 0006. Not yet verified:
+  the Evidently HTML step (needs 50+ logged rows in a nightly run) and the page against a redeployed
+  API. Note a plain `dvc repro` reruns `train` (stale deps) and deletes its outputs before the
+  dirty-tree guard stops it; use `--single-item` for one stage.
+- Next: **Phase 7 — ULB secondary dataset**; read its section of `docs/plan.md` first.
+- Last completed tag: `v1.1-monitoring` (Phase 6); earlier: `v1.0` (Phase 5), `v0.4-demo` (Phase 4), `v0.3-model` (Phase 3),
   `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0)
 
 Update this section as work progresses.
