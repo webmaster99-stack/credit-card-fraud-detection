@@ -15,6 +15,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-install-project --no-default-groups --group api
 
+COPY README.md ./
 COPY src ./src
 COPY api ./api
 RUN uv sync --locked --no-editable --no-default-groups --group api
