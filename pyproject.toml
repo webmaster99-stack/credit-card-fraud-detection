@@ -36,6 +36,9 @@ api = [
     "slowapi>=0.1.9",
     "python-multipart>=0.0.9",
 ]
+monitoring = [
+    "evidently>=0.7",
+]
 dev = [
     "httpx>=0.27",
     "ipykernel>=7.3.0",
@@ -70,7 +73,7 @@ pythonpath = ["demo", "."]
 
 [tool.ruff]
 line-length = 100
-src = ["src", "tests", "api"]
+src = ["src", "tests", "api", "monitoring"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
@@ -78,7 +81,7 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-files = ["src", "api"]
+files = ["src", "api", "monitoring"]
 
 [[tool.mypy.overrides]]
 module = [
@@ -93,6 +96,7 @@ module = [
     "scipy.*",
     "joblib.*",
     "slowapi.*",
+    "evidently.*",
 ]
 ignore_missing_imports = true
 

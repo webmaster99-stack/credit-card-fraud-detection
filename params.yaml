@@ -110,6 +110,34 @@ serving:
   # only displayed and scored for illustration; nothing is evaluated or tuned on them.
   n_examples_per_class: 10
 
+monitoring:
+  # Reference window for drift: the validation split, sampled (docs/plan.md Phase 6). Never test.
+  reference_split: valid
+  reference_sample_rows: 50000
+  # Minimum logged predictions in a day before that day's drift/flag-rate checks mean anything.
+  min_rows_per_day: 50
+  # Numeric inputs and derived columns compared against the reference (PSI + Wasserstein).
+  numeric_features: [amt, city_pop, age, distance_km, hour]
+  categorical_features: [category, gender, state]
+  psi_bins: 10
+  # PSI rule of thumb: < 0.1 stable, 0.1-0.25 moderate, > 0.25 major shift.
+  psi_alert: 0.25
+  # Alert when at least `drift_features_min` features drift on `drift_days` consecutive days.
+  drift_features_min: 1
+  drift_days: 3
+  # Prediction drift: alert when the daily flag rate leaves [low, high] x the validation flag rate.
+  flag_rate_low: 0.5
+  flag_rate_high: 2.0
+  # Data quality and service thresholds (fractions of requests).
+  max_invalid_fraction: 0.005
+  max_error_rate: 0.01
+  # Performance: alert when recall on labelled predictions drops more than this vs the test recall.
+  recall_drop_points: 0.10
+  min_labels_for_performance: 30
+  # Days of history the nightly job looks back over, and reports kept in the table.
+  lookback_days: 14
+  keep_reports: 60
+
 tune:
   # Optuna trials per tunable ladder step. Kept modest: DagsHub's free tier caps tracked experiments
   # on a private repo (docs/infra.md), and each trial is a nested MLflow run.

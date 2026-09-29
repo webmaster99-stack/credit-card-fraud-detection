@@ -341,3 +341,36 @@ stages:
       hash: md5
       md5: 9b49d0946ee2f20f6ad760e40d487f4c
       size: 194
+  monitoring_reference:
+    cmd: python -m fraud.monitoring.reference
+    deps:
+    - path: data/processed/valid.parquet
+      hash: md5
+      md5: 5eb19f7d629869e2b585e41102c38cb5
+      size: 10037261
+    - path: reports/test_evaluation.json
+      hash: md5
+      md5: 490ec36f4b24867c7104bcb7f3d5efaa
+      size: 565
+    - path: reports/train_metrics.json
+      hash: md5
+      md5: 9348f613740b10b55b1cb3e902825314
+      size: 197
+    - path: src/fraud/monitoring/reference.py
+      hash: md5
+      md5: e112fced58e9278f135cc975dd059b65
+      size: 1884
+    params:
+      params.yaml:
+        monitoring.reference_sample_rows: 50000
+        monitoring.reference_split: valid
+        seed: 42
+    outs:
+    - path: data/monitoring/reference.parquet
+      hash: md5
+      md5: 23d34c4b4f8bf19e66ad1913ae44f5fb
+      size: 2024773
+    - path: reports/monitoring_reference.json
+      hash: md5
+      md5: d2d20c31634504280e294012fec58192
+      size: 211

@@ -4,6 +4,7 @@ import type {
   BatchResult,
   HealthInfo,
   ModelInfo,
+  MonitoringReport,
   PredictResult,
   Transaction,
 } from "./types";
@@ -81,6 +82,22 @@ export async function apiPredictBatchCsv(file: File): Promise<BatchResult> {
 
 export function apiModelInfo(): Promise<ModelInfo> {
   return callJson<ModelInfo>("/v1/model");
+}
+
+/** The newest stored monitoring summary of a kind, or null if that job has not run yet. */
+export async function apiMonitoring<T>(
+  kind: "nightly" | "replay",
+): Promise<MonitoringReport<T> | null> {
+  const res = await call(`/v1/monitoring/${kind}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new FraudApiError(res.status, [`HTTP ${res.status}`]);
+  return (await res.json()) as MonitoringReport<T>;
+}
+
+/** The stored Evidently HTML report, or null when none exists. */
+export async function apiMonitoringReportHtml(): Promise<string | null> {
+  const res = await call("/v1/monitoring/nightly/report");
+  return res.ok ? await res.text() : null;
 }
 
 /** Never throws: a health check that itself fails just means "not ok" (e.g. the Render free-tier

@@ -11,6 +11,7 @@ from typing import Annotated, Any
 import pandas as pd
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from psycopg_pool import ConnectionPool
 from pydantic import ValidationError
 from slowapi import _rate_limit_exceeded_handler
@@ -24,6 +25,7 @@ from api.db import (
     init_schema,
     insert_prediction,
     insert_predictions_batch,
+    latest_monitoring_report,
     open_pool,
     ping,
     record_feedback,
@@ -267,6 +269,29 @@ def create_app() -> FastAPI:
             pipeline_version=model.pipeline_version,
             results=results,
         )
+
+    @app.get("/v1/monitoring/{kind}", dependencies=[Depends(require_api_key)])
+    def monitoring_latest(
+        kind: str, pool: Annotated[ConnectionPool, Depends(get_pool)]
+    ) -> dict[str, Any]:
+        """The newest stored job summary: `nightly` (drift report) or `replay` (drift demo)."""
+        if kind not in ("nightly", "replay"):
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Unknown monitoring kind '{kind}'.")
+        row = latest_monitoring_report(pool, kind)
+        if row is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"No '{kind}' report has run yet.")
+        return {"created_at": row["created_at"].isoformat(), "summary": row["summary"]}
+
+    @app.get(
+        "/v1/monitoring/nightly/report",
+        response_class=HTMLResponse,
+        dependencies=[Depends(require_api_key)],
+    )
+    def monitoring_report_html(pool: Annotated[ConnectionPool, Depends(get_pool)]) -> HTMLResponse:
+        row = latest_monitoring_report(pool, "nightly", with_html=True)
+        if row is None or not row["report_html"]:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "No Evidently report stored yet.")
+        return HTMLResponse(row["report_html"])
 
     @app.post("/v1/feedback", response_model=FeedbackOut, dependencies=[Depends(require_api_key)])
     def feedback(

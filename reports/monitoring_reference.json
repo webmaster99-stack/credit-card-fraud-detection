@@ -1,0 +1,7 @@
+{
+  "reference_rows": 50000,
+  "validation_fraud_rate": 0.004407307282706644,
+  "validation_flag_rate": 0.008724502334725978,
+  "test_recall": 0.9861111111111112,
+  "test_precision": 0.4461092315128081
+}

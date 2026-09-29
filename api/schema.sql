@@ -35,3 +35,24 @@ CREATE TABLE IF NOT EXISTS predictions (
 
 -- Card history lookups: "every earlier row for this card", ordered by time.
 CREATE INDEX IF NOT EXISTS idx_predictions_card_ts ON predictions (card_id, trans_ts);
+
+-- Phase 6 monitoring. One row per /v1/* request: the service and data-quality layers count
+-- errors (5xx) and invalid inputs (422) from here, since rejected requests never reach `predictions`.
+CREATE TABLE IF NOT EXISTS api_requests (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    path TEXT NOT NULL,
+    status_code INTEGER NOT NULL,
+    duration_ms DOUBLE PRECISION NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_api_requests_created ON api_requests (created_at);
+
+-- The nightly job's output: one JSON summary per run, newest served by /v1/monitoring/latest.
+CREATE TABLE IF NOT EXISTS monitoring_reports (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    kind TEXT NOT NULL,  -- 'nightly' or 'replay'
+    summary JSONB NOT NULL,
+    report_html TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_monitoring_reports_kind ON monitoring_reports (kind, created_at DESC);

@@ -1,0 +1,29 @@
+name: Nightly monitoring
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - run: uv sync --locked --group monitoring
+      - name: Fetch the drift reference from the DVC remote
+        # DagsHub accepts the same token as MLflow; only the reference stage's outputs are pulled.
+        run: |
+          remote="$(uv run dvc remote default)"
+          uv run dvc remote modify --local "$remote" auth basic
+          uv run dvc remote modify --local "$remote" user "${{ secrets.MLFLOW_TRACKING_USERNAME }}"
+          uv run dvc remote modify --local "$remote" password "${{ secrets.MLFLOW_TRACKING_PASSWORD }}"
+          uv run dvc pull data/monitoring/reference.parquet
+      - name: Run the checks
+        # Exits 1 when any alert fires, so a red run is the alert (GitHub emails the owner).
+        run: uv run python -m monitoring.nightly

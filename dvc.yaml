@@ -98,6 +98,23 @@ stages:
     metrics:
       - reports/train_metrics_demo.json:
           cache: false
+  monitoring_reference:
+    # Drift reference for the nightly job: a validation sample plus the alert baselines.
+    cmd: python -m fraud.monitoring.reference
+    deps:
+      - data/processed/valid.parquet
+      - reports/train_metrics.json
+      - reports/test_evaluation.json
+      - src/fraud/monitoring/reference.py
+    params:
+      - seed
+      - monitoring.reference_split
+      - monitoring.reference_sample_rows
+    outs:
+      - data/monitoring/reference.parquet
+    metrics:
+      - reports/monitoring_reference.json:
+          cache: false
   evaluate:
     cmd: python -m fraud.models.evaluate
     deps:

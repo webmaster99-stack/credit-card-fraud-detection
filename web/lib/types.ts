@@ -93,6 +93,63 @@ export interface HealthInfo {
   database_ok: boolean;
 }
 
+export interface FeatureDrift {
+  feature: string;
+  kind: "numeric" | "categorical";
+  psi: number;
+  wasserstein_std: number | null;
+  drifted: boolean;
+}
+
+export interface FlagStatus {
+  flag_rate?: number;
+  reference_flag_rate?: number;
+  ratio?: number | null;
+  outside_band: boolean;
+}
+
+export interface PerformanceInfo {
+  n_labelled: number;
+  enough_labels: boolean;
+  recall?: number | null;
+  precision?: number | null;
+  recall_drop?: number | null;
+  alert?: boolean;
+}
+
+export interface MonitoringAlert {
+  layer: string;
+  message: string;
+}
+
+export interface NightlySummary {
+  n_predictions: number;
+  service: {
+    requests: number;
+    error_rate: number | null;
+    invalid_fraction: number;
+    p95_latency_ms: number | null;
+  };
+  daily: { day: string; n: number; n_drifted: number; features?: FeatureDrift[]; flag: FlagStatus }[];
+  performance: PerformanceInfo;
+  alerts: MonitoringAlert[];
+}
+
+export interface ReplaySummary {
+  n_rows: number;
+  split: string;
+  shift: { category: string; amount_factor: number } | null;
+  features: FeatureDrift[];
+  n_drifted: number;
+  flag: FlagStatus;
+  performance: PerformanceInfo;
+}
+
+export interface MonitoringReport<T> {
+  created_at: string;
+  summary: T;
+}
+
 /** The API's InputValidationError.problems, or a list of Pydantic error messages. */
 export interface ApiProblem {
   detail: string[] | string;

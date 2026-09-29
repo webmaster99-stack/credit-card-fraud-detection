@@ -224,10 +224,18 @@ Fraud labels arrive late (chargebacks take weeks), so monitoring runs on two clo
 
 **Tasks**
 
-- [ ] Nightly Evidently job (GitHub Action)
-- [ ] Monitoring page in `web/`
-- [ ] Drift replay script in `monitoring/`
-- [ ] Runbook
+*Progress (code written; the items below stay unticked until run end to end, see ADR 0006):*
+
+- [ ] Nightly Evidently job (GitHub Action) — `monitoring/nightly.py`, `.github/workflows/monitoring.yml`,
+  `src/fraud/monitoring/` (unit-tested alert logic), `monitoring_reference` dvc stage. Not yet run:
+  the DB queries (Docker was not running, so `tests/test_monitoring_db.py` skipped), the Evidently
+  report call, and the `dvc repro monitoring_reference` stage. Needs the new schema deployed
+  (`init_schema` creates `api_requests`, `monitoring_reports` on API startup) and GitHub secret
+  `DATABASE_URL`.
+- [ ] Monitoring page in `web/` — `web/app/monitoring/page.tsx`, `/v1/monitoring/*` API routes;
+  type-checks, not yet viewed against a live API
+- [ ] Drift replay script in `monitoring/` — `monitoring/replay.py`; not yet run against the live API
+- [x] Runbook — `docs/runbook.md`
 - [ ] README updated; tag `v1.1-monitoring`
 
 ## Phase 7 — ULB secondary dataset

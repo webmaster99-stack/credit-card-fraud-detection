@@ -14,6 +14,7 @@ from uuid import UUID
 
 import pandas as pd
 from psycopg.rows import dict_row
+from psycopg.types.json import Jsonb
 from psycopg_pool import ConnectionPool
 
 from fraud.serving.schema import REQUIRED_COLUMNS, validate_transactions
@@ -171,9 +172,59 @@ def record_feedback(pool: ConnectionPool, request_id: UUID, is_fraud: bool) -> b
         return cur.rowcount > 0
 
 
+def log_request(pool: ConnectionPool, path: str, status_code: int, duration_ms: float) -> None:
+    """Best-effort record of one API request for the service/data-quality monitoring layers."""
+    try:
+        with pool.connection() as conn:
+            conn.execute(
+                "INSERT INTO api_requests (path, status_code, duration_ms) VALUES (%s, %s, %s)",
+                (path, status_code, duration_ms),
+            )
+    except Exception:  # monitoring must never break serving
+        return
+
+
+def save_monitoring_report(
+    pool: ConnectionPool,
+    kind: str,
+    summary: dict[str, Any],
+    report_html: str | None = None,
+    *,
+    keep: int = 60,
+) -> None:
+    """Store one job result, then trim that kind to its ``keep`` newest rows."""
+    with pool.connection() as conn:
+        conn.execute(
+            "INSERT INTO monitoring_reports (kind, summary, report_html) VALUES (%s, %s, %s)",
+            (kind, Jsonb(summary), report_html),
+        )
+        conn.execute(
+            "DELETE FROM monitoring_reports WHERE kind = %(kind)s AND id NOT IN ("
+            "SELECT id FROM monitoring_reports WHERE kind = %(kind)s "
+            "ORDER BY created_at DESC LIMIT %(keep)s)",
+            {"kind": kind, "keep": keep},
+        )
+
+
+def latest_monitoring_report(
+    pool: ConnectionPool, kind: str, *, with_html: bool = False
+) -> dict[str, Any] | None:
+    columns = "created_at, summary" + (", report_html" if with_html else "")
+    query = (
+        f"SELECT {columns} FROM monitoring_reports "  # noqa: S608
+        "WHERE kind = %s ORDER BY created_at DESC LIMIT 1"
+    )
+    with pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+        row: dict[str, Any] | None = cur.execute(query, (kind,)).fetchone()
+    return row
+
+
 __all__ = [
     "close_pool",
     "fetch_card_history",
+    "latest_monitoring_report",
+    "log_request",
+    "save_monitoring_report",
     "init_schema",
     "insert_prediction",
     "insert_predictions_batch",

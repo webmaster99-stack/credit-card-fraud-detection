@@ -6,9 +6,12 @@ import sys
 import time
 from collections.abc import Awaitable, Callable
 
+from starlette.concurrency import run_in_threadpool
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
+
+from api.db import log_request
 
 logger = logging.getLogger("fraud.api")
 
@@ -53,4 +56,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 }
             },
         )
+        pool = getattr(request.app.state, "pool", None)
+        if pool is not None and request.url.path.startswith("/v1/"):
+            await run_in_threadpool(
+                log_request, pool, request.url.path, response.status_code, duration_ms
+            )
         return response
