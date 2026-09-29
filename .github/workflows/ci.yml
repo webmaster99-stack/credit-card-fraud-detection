@@ -3,6 +3,8 @@ name: CI
 on:
   push:
     branches: [main]
+    # Tag pushes run the full pipeline too; `deploy-api` below only fires for these.
+    tags: ["v*"]
   pull_request:
 
 jobs:
