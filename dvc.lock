@@ -374,3 +374,43 @@ stages:
       hash: md5
       md5: d2d20c31634504280e294012fec58192
       size: 211
+  ulb_ingest:
+    cmd: python -m fraud.ulb.data ingest
+    params:
+      params.yaml:
+        ulb.expected_files:
+        - creditcard.csv
+        ulb.kaggle_dataset: mlg-ulb/creditcardfraud
+    outs:
+    - path: data/raw/ulb
+      hash: md5
+      md5: f2c7448614b9ec3d9e7e25dac874171f.dir
+      size: 150828752
+      nfiles: 1
+  ulb_split:
+    cmd: python -m fraud.ulb.data split
+    deps:
+    - path: data/raw/ulb
+      hash: md5
+      md5: f2c7448614b9ec3d9e7e25dac874171f.dir
+      size: 150828752
+      nfiles: 1
+    - path: src/fraud/ulb/data.py
+      hash: md5
+      md5: b272a83b2d3ff2820c73f312e6c94950
+      size: 3573
+    params:
+      params.yaml:
+        ulb.split:
+          train_end_hour: 28
+          valid_end_hour: 40
+    outs:
+    - path: data/processed_ulb
+      hash: md5
+      md5: 5129b1cea80bafc8e7303a67037933f9.dir
+      size: 79041480
+      nfiles: 3
+    - path: reports/ulb_split_summary.json
+      hash: md5
+      md5: 6993714b45dc2cdd0a0b260d08852c9e
+      size: 503

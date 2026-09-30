@@ -61,14 +61,14 @@ def ensure_clean_tree(repo: Path = REPO_ROOT, ignore: tuple[str, ...] = ()) -> N
         raise DirtyTreeError("Refusing to run: git tree has uncommitted changes.")
 
 
-def dvc_data_md5(lock_path: Path = REPO_ROOT / "dvc.lock") -> str:
-    """Return the md5 recorded in dvc.lock for data/processed, or 'n/a' if absent."""
+def dvc_data_md5(lock_path: Path = REPO_ROOT / "dvc.lock", data_path: str = DVC_DATA_PATH) -> str:
+    """Return the md5 recorded in dvc.lock for `data_path` (default data/processed), or 'n/a'."""
     if not lock_path.exists():
         return NOT_AVAILABLE
     lock = yaml.safe_load(lock_path.read_text(encoding="utf-8")) or {}
     for stage in (lock.get("stages") or {}).values():
         for out in stage.get("outs") or []:
-            if out.get("path") == DVC_DATA_PATH:
+            if out.get("path") == data_path:
                 return str(out["md5"])
     return NOT_AVAILABLE
 
@@ -81,9 +81,15 @@ def split_spec(split: dict[str, str]) -> str:
     )
 
 
-def lineage_tags(params: dict[str, Any], repo: Path = REPO_ROOT) -> dict[str, str]:
+def lineage_tags(
+    params: dict[str, Any],
+    repo: Path = REPO_ROOT,
+    overrides: dict[str, str] | None = None,
+) -> dict[str, str]:
+    """The tags every run carries. A second dataset (Phase 7's ULB) passes `overrides` for the
+    dataset, data hash, pipeline version and split spec; the tag names stay the same."""
     dataset = params["dataset"]
-    return {
+    tags = {
         "git_commit": git_commit(repo),
         "dataset_name": dataset["name"],
         "dataset_version": dataset["version"],
@@ -91,6 +97,7 @@ def lineage_tags(params: dict[str, Any], repo: Path = REPO_ROOT) -> dict[str, st
         "pipeline_version": PIPELINE_VERSION,
         "split_spec": split_spec(params["split"]),
     }
+    return {**tags, **(overrides or {})}
 
 
 def _log_requirements_lock(repo: Path) -> None:
@@ -113,19 +120,22 @@ def start_run(
     require_clean: bool = True,
     repo: Path = REPO_ROOT,
     ignore_dirty: tuple[str, ...] = (),
+    experiment_name: str | None = None,
+    lineage_overrides: dict[str, str] | None = None,
 ) -> Iterator[mlflow.ActiveRun]:
     """Open an MLflow run stamped with lineage tags and the reproducibility artifacts.
 
     Tracking URI and credentials come from the environment (.env locally, secrets in CI).
-    `ignore_dirty` is forwarded to `ensure_clean_tree` (see its docstring).
+    `ignore_dirty` is forwarded to `ensure_clean_tree` (see its docstring). `experiment_name` and
+    `lineage_overrides` let a secondary dataset log to its own experiment with its own tags.
     """
     load_dotenv(repo / ".env")
     if require_clean:
         ensure_clean_tree(repo, ignore=ignore_dirty)
     params = load_params(repo / "params.yaml")
-    mlflow.set_experiment(params["mlflow"]["experiment_name"])
+    mlflow.set_experiment(experiment_name or params["mlflow"]["experiment_name"])
     with mlflow.start_run(run_name=run_name) as run:
-        mlflow.set_tags(lineage_tags(params, repo))
+        mlflow.set_tags(lineage_tags(params, repo, lineage_overrides))
         mlflow.log_artifact(str(PARAMS_PATH if repo == REPO_ROOT else repo / "params.yaml"))
         _log_requirements_lock(repo)
         yield run

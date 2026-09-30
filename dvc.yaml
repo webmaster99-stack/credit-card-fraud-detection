@@ -135,3 +135,42 @@ stages:
     metrics:
       - reports/evaluate_metrics.json:
           cache: false
+  ulb_ingest:
+    cmd: python -m fraud.ulb.data ingest
+    params:
+      - ulb.kaggle_dataset
+      - ulb.expected_files
+    outs:
+      - data/raw/ulb
+  ulb_split:
+    cmd: python -m fraud.ulb.data split
+    deps:
+      - data/raw/ulb
+      - src/fraud/ulb/data.py
+    params:
+      - ulb.split
+    outs:
+      - data/processed_ulb
+    metrics:
+      - reports/ulb_split_summary.json:
+          cache: false
+  ulb_train:
+    cmd: python -m fraud.ulb.train
+    deps:
+      # Train and valid only: the ULB test split is scored once, by fraud.ulb.evaluate_test.
+      - data/processed_ulb/train.parquet
+      - data/processed_ulb/valid.parquet
+      - src/fraud/ulb/features.py
+      - src/fraud/ulb/train.py
+      - src/fraud/models/metrics.py
+      - src/fraud/models/calibrate.py
+      - src/fraud/models/estimator.py
+      - src/fraud/models/ladder.py
+    params:
+      - seed
+      - ulb
+    outs:
+      - data/models/ulb_pipeline.joblib
+    metrics:
+      - reports/ulb_ladder.json:
+          cache: false

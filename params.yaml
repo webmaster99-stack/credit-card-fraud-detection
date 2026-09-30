@@ -143,6 +143,40 @@ monitoring:
   lookback_days: 14
   keep_reports: 14
 
+ulb:
+  # Phase 7: the ULB European-cardholders benchmark. Same protocol as Sparkov, its own dataset,
+  # feature pipeline, experiment and registered model; nothing here touches the served model.
+  dataset:
+    name: ulb
+    version: v1
+  kaggle_dataset: mlg-ulb/creditcardfraud
+  expected_files: [creditcard.csv]
+  # ULB has no calendar dates, only `Time` (seconds since the first transaction, two days in total).
+  # Windows are half-open hour ranges on Time; the last one is open-ended.
+  split:
+    train_end_hour: 28
+    valid_end_hour: 40
+  mlflow:
+    experiment_name: fraud-detection-ulb
+  registry_name: fraud-ulb
+  features:
+    seconds_per_day: 86400
+  # Ladder rungs run on ULB. Fixed hyperparameters, NOT tuned: a benchmark, not a second search
+  # (the ladder's Optuna sweep on Sparkov used 25 trials/rung; here 492 frauds make tuning noisy).
+  calibration: sigmoid
+  min_precision: 0.50
+  fn_cost: 20.0
+  fp_cost: 1.0
+  steps:
+    logreg: {C: 1.0}
+    random_forest: {n_estimators: 200, max_depth: 12, min_samples_leaf: 2}
+    lightgbm:
+      {n_estimators: 300, num_leaves: 31, learning_rate: 0.05, min_child_samples: 20,
+       subsample: 0.8, colsample_bytree: 0.8, scale_pos_weight: 10.0}
+    xgboost:
+      {n_estimators: 300, max_depth: 6, learning_rate: 0.05, min_child_weight: 1,
+       subsample: 0.8, colsample_bytree: 0.8, scale_pos_weight: 10.0}
+
 tune:
   # Optuna trials per tunable ladder step. Kept modest: DagsHub's free tier caps tracked experiments
   # on a private repo (docs/infra.md), and each trial is a nested MLflow run.
