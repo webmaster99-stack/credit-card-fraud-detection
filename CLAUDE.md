@@ -105,7 +105,7 @@ One monorepo, so a single commit pins everything that produced a model. The loca
 fraud-detection/
 ├── data/                 # DVC-tracked, never committed to git
 │   ├── raw/sparkov/      # original CSVs
-│   ├── raw/ulb/          # Phase 7
+│   ├── raw/ulb/          # Phase 7 (processed splits in data/processed_ulb/)
 │   ├── interim/          # cleaned, PII dropped
 │   └── processed/        # time-based splits
 ├── notebooks/            # 01_eda, 02_baseline, 03_models, 04_threshold, 05_explain
@@ -225,8 +225,16 @@ The API returns the model version and pipeline version with every prediction, so
   high-cardinality features (`state`) sit near the 0.25 PSI threshold. A plain `dvc repro` reruns
   `train` (stale deps) and deletes its outputs before the dirty-tree guard stops it; use
   `dvc repro --single-item <stage>` for one stage.
-- Next: **Phase 7 — ULB secondary dataset**; read its section of `docs/plan.md` first.
-- Last completed tag: `v1.1.1` (Phase 6 patch), `v1.1-monitoring` (Phase 6); earlier: `v1.0` (Phase 5), `v0.4-demo` (Phase 4), `v0.3-model` (Phase 3),
+- Current phase: **Phase 7 — ULB secondary dataset** complete, tag `v1.2-ulb`. `src/fraud/ulb/`, dvc stages
+  `ulb_ingest`/`ulb_split`/`ulb_train`, `features-ulb-1.0.0`, data card `docs/data_cards/ulb.md`, ADR 0007.
+  Split by Time (train <28 h, valid 28-40 h, test after; 333/82/77 frauds), untuned rungs; validation
+  recall @ precision 0.50: xgboost 0.817 (winner), random forest 0.817, lightgbm 0.805, logreg 0.793.
+  Single test evaluation (`python -m fraud.ulb.evaluate_test`): recall 0.792 (CI 0.699-0.877), precision
+  0.550 (CI 0.457-0.637), PR-AUC 0.803, so precision >= 0.50 is met but the CI spans it. Registered as
+  `fraud-ulb` v1 `@champion` on DagsHub MLflow; never served. README has the synthetic-vs-real table.
+  LightGBM needed `scale_pos_weight` 1.0 (10 diverged). All seven phases are done; the Definition of
+  done items above still open are the project's remaining work.
+- Last completed tag: `v1.2-ulb` (Phase 7), `v1.1.1` (Phase 6 patch), `v1.1-monitoring` (Phase 6); earlier: `v1.0` (Phase 5), `v0.4-demo` (Phase 4), `v0.3-model` (Phase 3),
   `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0)
 
 Update this section as work progresses.

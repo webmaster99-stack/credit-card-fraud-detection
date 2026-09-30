@@ -10,7 +10,7 @@ Modeling, below. Earlier: `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0
 Phase 4 (Gradio demo) complete, tag `v0.4-demo`: the Space is live (link below) and serves a
 stateless v1 model, not the champion (see Demo). Phase 5 (full-stack app) complete, tag `v1.0`: a
 Next.js frontend on Vercel and a FastAPI backend on Render serve the champion (see Full-stack app). Phase 6 (monitoring) complete, tag `v1.1-monitoring` (patch `v1.1.1`;
-see Monitoring).
+see Monitoring). Phase 7 (ULB real-data benchmark) complete, tag `v1.2-ulb` (see ULB benchmark).
 
 ## Setup
 
@@ -155,7 +155,36 @@ Details are in `notebooks/01_eda.ipynb` and `docs/data_cards/sparkov.md`.
 **Caveat: this dataset is simulated and easy.** Most fraud sits in a 22:00 to 03:59 window (84.8% of frauds, 23.5%
 of traffic), fraud amounts fall in two fixed bands with a ceiling, and a depth-5 decision tree on five raw columns
 already reaches validation ROC AUC 0.96. Metrics on Sparkov will look better than they would on real traffic and
-should be read with that in mind. A real-data benchmark (ULB) is planned for Phase 7.
+should be read with that in mind. The ULB benchmark (Phase 7, below) puts a number on that.
+
+## ULB benchmark (Phase 7)
+
+The same protocol on real, anonymised data: the Kaggle ULB European-cardholders set (284,807
+transactions over two days, 0.173% fraud, PCA features V1–V28; `docs/data_cards/ulb.md`). It has
+its own stages (`ulb_ingest`, `ulb_split`, `ulb_train`), feature pipeline (`features-ulb-1.0.0`:
+amount scaling and time-of-day only), MLflow experiment (`fraud-detection-ulb`) and registered model
+(`fraud-ulb`, v1 `@champion` = XGBoost). It is never served; the demo and API only use `fraud-classifier`.
+Split by `Time` (train < 28 h, validation 28–40 h, test after 40 h), threshold picked on validation for
+precision ≥ 0.50, test scored once (`python -m fraud.ulb.evaluate_test`). The four rungs (logistic
+regression, random forest, LightGBM, XGBoost) use fixed, untuned hyperparameters: with 82 frauds in
+validation, tuning would mostly fit noise.
+
+| | Sparkov (synthetic) | ULB (real) |
+| --- | --- | --- |
+| Model | LightGBM, v2 features (tuned) | XGBoost (untuned) |
+| Frauds in test | 936 | 77 |
+| Validation recall @ precision 0.50 | 0.990 | 0.817 |
+| Test recall | 0.986 (CI 0.978–0.993) | 0.792 (CI 0.699–0.877) |
+| Test precision | 0.446 (CI 0.423–0.468) | 0.550 (CI 0.457–0.637) |
+| Test PR-AUC | 0.973 | 0.803 (CI 0.715–0.882) |
+| Precision ≥ 0.50 on test | no | yes, but the CI spans 0.50 |
+
+What the gap says, with care: the rungs are close on ULB (validation recall 0.79–0.82), and Sparkov's
+0.99 does not carry over to real data, which supports treating Sparkov numbers as optimistic. The
+comparison is not like for like: different models and tuning, ULB has no card history or
+merchant fields (so Sparkov's most useful v2 features cannot exist there), and ULB's 77 test frauds
+give wide intervals. Unlike Sparkov, ULB showed no validation-to-test gap, over a test window of only
+a few hours, so it says nothing about drift over months.
 
 ## Links
 

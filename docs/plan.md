@@ -240,9 +240,10 @@ Fraud labels arrive late (chargebacks take weeks), so monitoring runs on two clo
 
 **Goal:** rerun the model ladder on real (anonymized) data as a benchmark and prove the lineage setup handles several datasets.
 
-- [ ] Add `data/raw/ulb/` under DVC with its own data card and `dataset_name=ulb`
-- [ ] Separate feature pipeline `features-ulb-1.0.0`: amount scaling and time-of-day only (V1–V28 are already PCA outputs)
-- [ ] Same protocol: split by `Time` (earlier hours train, later hours test), same metric and precision ≥ 0.50 budget
-- [ ] Register ULB models under their own name (`fraud-ulb`), never mixed with the served Sparkov model
-- [ ] README side-by-side results: synthetic vs real data, and what the gap says
+- [x] Add `data/raw/ulb/` under DVC with its own data card and `dataset_name=ulb` — `docs/data_cards/ulb.md`
+- [x] Separate feature pipeline `features-ulb-1.0.0`: amount scaling and time-of-day only (V1–V28 are already PCA outputs)
+- [x] Same protocol: split by `Time` (earlier hours train, later hours test), same metric and precision ≥ 0.50 budget — 28 h / 40 h, untuned rungs (ADR 0007)
+- [x] Register ULB models under their own name (`fraud-ulb`), never mixed with the served Sparkov model — v1 `@champion` (XGBoost)
+- [x] README side-by-side results: synthetic vs real data, and what the gap says
+- [x] Tag `v1.2-ulb`
 
