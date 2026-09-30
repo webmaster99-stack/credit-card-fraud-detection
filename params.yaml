@@ -170,9 +170,12 @@ ulb:
   steps:
     logreg: {C: 1.0}
     random_forest: {n_estimators: 200, max_depth: 12, min_samples_leaf: 2}
+    # scale_pos_weight 1.0, not 10: at 10 lightgbm diverged on these ~330 positives (train PR-AUC
+    # 0.70, validation 0.13, threshold inf); at 1.0 it fits normally. A stability fix, chosen before
+    # looking at any test data; the calibration step already handles the class imbalance.
     lightgbm:
       {n_estimators: 300, num_leaves: 31, learning_rate: 0.05, min_child_samples: 20,
-       subsample: 0.8, colsample_bytree: 0.8, scale_pos_weight: 10.0}
+       subsample: 0.8, colsample_bytree: 0.8, scale_pos_weight: 1.0}
     xgboost:
       {n_estimators: 300, max_depth: 6, learning_rate: 0.05, min_child_weight: 1,
        subsample: 0.8, colsample_bytree: 0.8, scale_pos_weight: 10.0}

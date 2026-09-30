@@ -1,0 +1,37 @@
+{
+  "best": "xgboost",
+  "steps": [
+    {
+      "step": "logreg",
+      "threshold": 0.09507893294765082,
+      "precision": 0.5,
+      "recall": 0.7926829268292683,
+      "met_budget": true,
+      "pr_auc": 0.7568923261423744
+    },
+    {
+      "step": "random_forest",
+      "threshold": 0.0024418775814824493,
+      "precision": 0.5,
+      "recall": 0.8170731707317073,
+      "met_budget": true,
+      "pr_auc": 0.7539410310140724
+    },
+    {
+      "step": "lightgbm",
+      "threshold": Infinity,
+      "precision": 1.0,
+      "recall": 0.0,
+      "met_budget": false,
+      "pr_auc": 0.1281797712387332
+    },
+    {
+      "step": "xgboost",
+      "threshold": 0.0007646489539183676,
+      "precision": 0.5,
+      "recall": 0.8170731707317073,
+      "met_budget": true,
+      "pr_auc": 0.7960095993608935
+    }
+  ]
+}
