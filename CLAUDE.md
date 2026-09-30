@@ -64,6 +64,9 @@ pre-commit run --all-files
 docker compose up -d db         # local Postgres for the API (port 5433; see docker-compose.yml)
 uv run uvicorn api.main:app --reload   # run the API locally (Phase 5; needs DATABASE_URL, API_KEY in .env)
 python demo/app.py              # run the Gradio demo locally (Phase 4; FRAUD_MODEL_SOURCE=data/bundle for a local export)
+uv run --group monitoring python -m monitoring.nightly   # the nightly checks (needs DATABASE_URL; also runs in GitHub Actions)
+uv run python -m monitoring.replay --rows 300 [--shift]  # drift replay against the live API (needs API_URL, API_KEY, DATABASE_URL)
+uv run dvc repro --single-item monitoring_reference      # rebuild the drift reference without rerunning upstream stages
 ```
 
 Update this list as real entry points are created.
@@ -200,19 +203,30 @@ The API returns the model version and pipeline version with every prediction, so
   the champion's decision threshold is very low (0.000305) and the ordinary test transaction scored just
   under it, worth revisiting given test precision 0.446; the served `pipeline_version` reads
   `features-1.0.0` for the v2 feature set, so the version was probably never bumped for the v2 features;
-  `/v1/feedback` and the frontend's predict and batch pages were not exercised end-to-end; the local
+  the frontend's predict and batch pages were not exercised end-to-end (`/v1/feedback` was, by the
+  Phase 6 replay against the live API); the local
   `docker build` was never run (C: drive was full; CI and Render build the same Dockerfile);
   `ALLOWED_ORIGINS` is still the localhost default (browsers never call the API directly). See
   `docs/plan.md` for the task list.
-- Current phase: **Phase 6 — Monitoring** complete, tag `v1.1-monitoring`. `src/fraud/monitoring/`
-  (PSI/Wasserstein/alert logic, thresholds in `params.yaml`), nightly GitHub Action
-  (`monitoring/nightly.py`, fails on alert), `monitoring/replay.py`, `monitoring_reference` dvc stage,
-  `/v1/monitoring/*` endpoints, web `/monitoring` page, `docs/runbook.md`, ADR 0006. Not yet verified:
-  the Evidently HTML step (needs 50+ logged rows in a nightly run) and the page against a redeployed
-  API. Note a plain `dvc repro` reruns `train` (stale deps) and deletes its outputs before the
-  dirty-tree guard stops it; use `--single-item` for one stage.
+- Current phase: **Phase 6 — Monitoring** complete, tag `v1.1-monitoring`, plus patch `v1.1.1`.
+  `src/fraud/monitoring/` (PSI/Wasserstein/alert logic, thresholds in `params.yaml`), nightly GitHub
+  Action (`monitoring/nightly.py`, secrets `DATABASE_URL` + the DagsHub credentials; fails when an
+  alert fires), `monitoring/replay.py`, `monitoring_reference` dvc stage (reference pushed to the DVC
+  remote), `/v1/monitoring/{nightly,replay}` and `/v1/monitoring/nightly/report` endpoints,
+  `api_requests` and `monitoring_reports` tables, web `/monitoring` page, `docs/runbook.md`, ADR 0006.
+  Verified live: the nightly workflow (green, Evidently report rendered and stored), both replays
+  against the live API (clean: no drift; amounts x3: `amt` PSI 1.29 flagged) and the `/monitoring`
+  page on Vercel. `v1.1.1` added `?source=replay` on the batch endpoint: replay rows are logged as
+  `replay` and excluded from the nightly checks (the first 900 were relabelled by a one-off UPDATE).
+  The Evidently HTML is ~4 MB whatever the sample size (its JS bundle), so the web route sends it
+  gzipped (Vercel's function response cap is ~4.5 MB). Known gaps: `keep_reports: 60` at ~4 MB per
+  nightly report is a lot of Neon's 0.5 GB (`docs/infra.md`); a single small category's amount shift
+  is too subtle to trip PSI (the replay's default shifts all amounts); small daily samples on
+  high-cardinality features (`state`) sit near the 0.25 PSI threshold. A plain `dvc repro` reruns
+  `train` (stale deps) and deletes its outputs before the dirty-tree guard stops it; use
+  `dvc repro --single-item <stage>` for one stage.
 - Next: **Phase 7 — ULB secondary dataset**; read its section of `docs/plan.md` first.
-- Last completed tag: `v1.1-monitoring` (Phase 6); earlier: `v1.0` (Phase 5), `v0.4-demo` (Phase 4), `v0.3-model` (Phase 3),
+- Last completed tag: `v1.1.1` (Phase 6 patch), `v1.1-monitoring` (Phase 6); earlier: `v1.0` (Phase 5), `v0.4-demo` (Phase 4), `v0.3-model` (Phase 3),
   `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0)
 
 Update this section as work progresses.
@@ -249,5 +263,5 @@ Phases 1–7 are in `docs/plan.md`.
 - [ ] Every registered model shows its commit, dataset version, pipeline version and feature list
 - [ ] Champion meets precision ≥ 0.50 on the untouched test set
 - [ ] Gradio Space and full-stack app both live, serving the same model version
-- [ ] Monitoring page shows the drift replay being detected
+- [x] Monitoring page shows the drift replay being detected — *live on Vercel, `amt` flagged in the shifted replay*
 - [ ] README, data cards, model cards, ADRs and runbook complete

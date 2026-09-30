@@ -32,3 +32,6 @@ results are awkward to threshold ("3 days running", "flag rate 0.5x-2x") and to 
   source `replay` (batch endpoint `?source=replay`) and the nightly job excludes them; the first
   replays ran before this existed and were relabelled by a one-off UPDATE.
 - Performance monitoring is only as good as the labels posted to `/v1/feedback`.
+- The Evidently report is ~4 MB whatever the sample (its embedded JS), so the web route sends it
+  gzipped to stay under Vercel's ~4.5 MB response cap; stored reports are large, so retention
+  (`keep_reports`) matters on Neon's free tier (`docs/infra.md`).

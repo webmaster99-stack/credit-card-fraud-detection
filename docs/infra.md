@@ -21,7 +21,8 @@ any of them. Everything must stay rebuildable from git + DVC in case a free tier
 | MLflow tracking URI | `https://dagshub.com/webmaster99-stack/credit-card-fraud-detection.mlflow` (credentials in git-ignored `.env`) |
 | HF Hub model repo | https://huggingface.co/ilian-hadzhidimitrov/fraud-classifier |
 | HF Space (Gradio demo) | https://huggingface.co/spaces/ilian-hadzhidimitrov/fraud-classifier-demo (free ZeroGPU slot) |
-| GitHub Actions secrets | `MLFLOW_TRACKING_URI`, `MLFLOW_TRACKING_USERNAME`, `MLFLOW_TRACKING_PASSWORD` |
+| GitHub Actions secrets | `MLFLOW_TRACKING_URI`, `MLFLOW_TRACKING_USERNAME`, `MLFLOW_TRACKING_PASSWORD` (also reused for `dvc pull` by the nightly monitoring job), `RENDER_DEPLOY_HOOK_URL` (Phase 5 deploys), `DATABASE_URL` (Neon; the nightly monitoring job) |
+| Nightly monitoring | `.github/workflows/monitoring.yml`, 03:17 UTC daily and on demand (`gh workflow run monitoring.yml`); see "Phase 6 monitoring" below |
 
 ## Decisions made on these limits
 
@@ -53,16 +54,16 @@ any of them. Everything must stay rebuildable from git + DVC in case a free tier
 - Vercel monthly bandwidth/invocation allotments and Render outbound bandwidth allotments were not
   stated on the pages consulted. Look them up before Phase 5.
 
-## Phase 5 setup (Neon and Render done; Vercel pending)
+## Phase 5 setup (Neon, Render and Vercel all done)
 
 The API (`api/`) and its tests are built and pass against a real Postgres (verified locally via
-`docker-compose.yml`'s `db` service - see ADR 0005). Neon and Render are set up and the API is live
-(see "Deployed state" below); the Vercel frontend is still to do.
+`docker-compose.yml`'s `db` service - see ADR 0005). Neon, Render and Vercel are set up and live
+(see "Deployed state" below).
 
 1. **Neon**: create a project, copy its connection string into `DATABASE_URL` (a GitHub secret for
-   CI/deploy, and a Render environment variable for the running service). `api/db.py`'s
-   `init_schema` creates the `predictions` table itself on first startup - no separate migration
-   step.
+   CI/deploy and the nightly monitoring job, and a Render environment variable for the running
+   service). `api/db.py`'s `init_schema` creates the tables (`predictions`, plus Phase 6's
+   `api_requests` and `monitoring_reports`) itself on first startup - no separate migration step.
 2. **Render**: new Web Service, "Docker" runtime, this GitHub repo, Dockerfile path `api/Dockerfile`,
    root directory `.`. Environment variables: `DATABASE_URL` (from Neon), `API_KEY` (any long random
    string - the frontend needs the same value), `ALLOWED_ORIGINS` (the Vercel URL once it exists),
@@ -125,3 +126,26 @@ Operational notes:
   here.
 - The local `docker compose up --build` check of `api/Dockerfile` is still worth doing once the C:
   drive has space, but it is no longer blocking.
+
+## Phase 6 monitoring
+
+- **Nightly job**: `.github/workflows/monitoring.yml` installs the `monitoring` dependency group
+  (Evidently), sets the DVC remote's credentials from the DagsHub secrets, runs
+  `dvc pull data/monitoring/reference.parquet`, then `python -m monitoring.nightly`. It needs the
+  secrets `DATABASE_URL`, `MLFLOW_TRACKING_USERNAME` and `MLFLOW_TRACKING_PASSWORD`. It exits 1
+  when an alert fires, so a red run is the alert; a run with under 50 logged rows skips the drift
+  checks and the Evidently report.
+- **Reference**: `dvc repro --single-item monitoring_reference` then `dvc push` (a plain
+  `dvc repro` would rerun `train` first). Rebuild it after every champion promotion (runbook).
+- **Deploys**: the API only redeploys on `v*` tags (Render auto-deploy is off), so an API change
+  needs a tag; `v1.1.1` deployed the `?source=replay` batch parameter. The nightly job and the web
+  app run from `main` without a tag (Vercel deploys on push).
+- **Vercel response cap**: the stored Evidently HTML is ~4.05 MB whatever the sample size (its
+  embedded JS bundle), close to Vercel's ~4.5 MB function response limit. The web route
+  `web/app/api/monitoring/report/route.ts` gzips it (~1.2 MB on the wire).
+- **Neon storage (open)**: `monitoring_reports` keeps `keep_reports` (60) nightly reports, each with
+  that ~4 MB HTML. Postgres compresses large text, but the worst case is far more than the free
+  tier's 0.5 GB comfortably allows beside the prediction log. Lower `monitoring.keep_reports`
+  (or store the HTML for only the latest report) before leaving the job running for weeks.
+- **Replay data**: the drift replay writes about 300 rows per run to the production prediction log,
+  tagged `source = 'replay'` and excluded from the checks (they still count toward Neon storage).

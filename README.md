@@ -9,8 +9,8 @@ Status: Phase 3 (modeling experiments) complete, tag `v0.3-model`. Champion: Lig
 Modeling, below. Earlier: `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0).
 Phase 4 (Gradio demo) complete, tag `v0.4-demo`: the Space is live (link below) and serves a
 stateless v1 model, not the champion (see Demo). Phase 5 (full-stack app) complete, tag `v1.0`: a
-Next.js frontend on Vercel and a FastAPI backend on Render serve the champion (see Full-stack app). Phase 6 (monitoring) complete, tag `v1.1-monitoring`
-(see Monitoring).
+Next.js frontend on Vercel and a FastAPI backend on Render serve the champion (see Full-stack app). Phase 6 (monitoring) complete, tag `v1.1-monitoring` (patch `v1.1.1`;
+see Monitoring).
 
 ## Setup
 
@@ -128,8 +128,9 @@ cd web && npm install && npm run dev                              # run the fron
 ```
 
 API endpoints: `POST /v1/predict`, `POST /v1/predict/batch` (CSV or JSON), `POST /v1/feedback`,
-`GET /v1/model`, `GET /v1/monitoring/{nightly,replay}`, `GET /health`. OpenAPI docs at `/docs` once
-the service is running.
+`GET /v1/model`, `GET /v1/monitoring/{nightly,replay}`, `GET /v1/monitoring/nightly/report` (the
+Evidently HTML), `GET /health`. `POST /v1/predict/batch` takes `?source=replay` to mark drift-replay
+rows. OpenAPI docs at `/docs` once the service is running.
 
 ## Monitoring (Phase 6)
 
@@ -137,12 +138,15 @@ A scheduled GitHub Action (`.github/workflows/monitoring.yml`, `python -m monito
 reads the API's prediction log and request log from Postgres and checks five layers: service error
 rate, invalid-input rate, input drift (PSI against a validation-split reference), flag-rate drift,
 and recall on labelled predictions. Thresholds are in `params.yaml` under `monitoring`; the run
-fails when an alert fires. Results and an Evidently report show on the web app's `/monitoring` page.
+fails when an alert fires. Results and an Evidently report show on the web app's `/monitoring` page
+(the ~4 MB report is sent gzipped, to stay under Vercel's function response cap).
 `python -m monitoring.replay [--shift]` replays held-out rows through the live API, with and
-without injected amount drift. `docs/runbook.md` covers alerts and retraining; design in ADR 0006.
+without every amount inflated x3; against the live API the clean run showed no drift and the shifted
+run flagged `amt` (PSI 1.29). `docs/runbook.md` covers alerts and retraining; design in ADR 0006.
 Limits: replay rows stay in the prediction log (source `replay`, excluded from the checks), and
-performance monitoring needs labels
-posted to `/v1/feedback`.
+performance monitoring needs labels posted to `/v1/feedback`. Small daily samples on high-cardinality
+features such as `state` can sit close to the PSI threshold, so early alerts on a low-traffic demo
+deserve a look before action.
 
 ## What the data looks like
 

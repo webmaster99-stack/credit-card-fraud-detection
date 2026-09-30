@@ -225,14 +225,16 @@ Fraud labels arrive late (chargebacks take weeks), so monitoring runs on two clo
 **Tasks**
 
 - [x] Nightly Evidently job (GitHub Action) — `monitoring/nightly.py`, `.github/workflows/monitoring.yml`,
-  `src/fraud/monitoring/`, `monitoring_reference` dvc stage. The DB tests pass against Postgres and
-  the workflow ran green once (only 6 rows then, so the Evidently HTML step is not yet exercised).
+  `src/fraud/monitoring/`, `monitoring_reference` dvc stage. The DB tests pass against Postgres in CI;
+  the workflow ran green and, with 906 logged rows, rendered and stored the Evidently report (it
+  exits 1 when an alert fires, so a red run is the alert).
 - [x] Monitoring page in `web/` — `web/app/monitoring/page.tsx`, `/v1/monitoring/*` API routes;
-  type-checks. Not yet viewed against a redeployed API.
+  verified live on Vercel against the redeployed API. The ~4 MB Evidently HTML is sent gzipped.
 - [x] Drift replay script in `monitoring/` — run against the live API: clean replay, no drift;
-  amounts x3, `amt` flagged. (A single-category shift was too small to trip PSI.)
+  amounts x3, `amt` flagged. (A single-category shift was too small to trip PSI.) Rows are logged as
+  source `replay` (`v1.1.1`) and excluded from the nightly checks.
 - [x] Runbook — `docs/runbook.md`
-- [x] README updated; tag `v1.1-monitoring`
+- [x] README updated; tags `v1.1-monitoring`, patch `v1.1.1`
 
 ## Phase 7 — ULB secondary dataset
 
