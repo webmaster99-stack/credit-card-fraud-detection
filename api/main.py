@@ -6,7 +6,7 @@ Run locally:  uv run uvicorn api.main:app --reload   (needs DATABASE_URL and API
 import io
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 import pandas as pd
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
@@ -184,7 +184,9 @@ def create_app() -> FastAPI:
         request: Request,
         model: Annotated[ServingModel, Depends(get_model)],
         pool: Annotated[ConnectionPool, Depends(get_pool)],
+        source: Literal["batch", "replay"] = "batch",
     ) -> BatchOut:
+        # `source=replay` marks the drift-replay demo's rows so monitoring can leave them out.
         defaults = serving_defaults()
         max_rows = int(defaults["max_batch_rows"])
         content_type = request.headers.get("content-type", "")
@@ -248,7 +250,7 @@ def create_app() -> FastAPI:
 
         rows_out = frame.to_dict("records")
         scores_out = [_score_dict(model, scored, i) for i in range(len(frame))]
-        request_ids = insert_predictions_batch(pool, rows_out, scores_out, source="batch")  # type: ignore[arg-type]
+        request_ids = insert_predictions_batch(pool, rows_out, scores_out, source=source)  # type: ignore[arg-type]
 
         results = [
             BatchRowOut(

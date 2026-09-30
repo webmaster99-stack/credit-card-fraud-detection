@@ -44,6 +44,13 @@ def test_save_and_latest_report_trims_to_keep(pg_pool) -> None:
     assert latest_monitoring_report(pg_pool, "replay") is None
 
 
+def test_read_predictions_excludes_replay_rows(pg_pool, clean_predictions) -> None:
+    insert_prediction(pg_pool, ROW, SCORES, source="single")
+    insert_prediction(pg_pool, ROW, SCORES, source="replay")
+    assert len(read_predictions(pg_pool, days=1)) == 1
+    assert len(read_predictions(pg_pool, days=1, exclude_source=None)) == 2
+
+
 def test_read_predictions_has_day_and_labels(pg_pool, clean_predictions) -> None:
     request_id = insert_prediction(pg_pool, ROW, SCORES, source="single")
     with pg_pool.connection() as conn:

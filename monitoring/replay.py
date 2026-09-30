@@ -9,7 +9,7 @@ monitoring, not tuning). Each run posts its rows to `/v1/predict/batch`, posts t
 the flagged-or-fraud rows to `/v1/feedback` after `--label-delay` seconds (chargebacks arrive
 late), and stores a `replay` summary that the web monitoring page shows: per-feature PSI against
 the validation reference, plus the model's flag rate and recall on the replayed rows.
-Replayed rows do land in the prediction log (source `batch`); use a scratch database if needed.
+Replayed rows land in the prediction log with source `replay`, which the nightly job excludes.
 """
 
 from __future__ import annotations
@@ -66,7 +66,7 @@ def score_rows(client: httpx.Client, rows: pd.DataFrame) -> pd.DataFrame:
     scored = []
     for start in range(0, len(rows), BATCH_CHUNK):
         chunk = rows.iloc[start : start + BATCH_CHUNK]
-        resp = client.post("/v1/predict/batch", json=_payload(chunk))
+        resp = client.post("/v1/predict/batch", params={"source": "replay"}, json=_payload(chunk))
         resp.raise_for_status()
         results = resp.json()["results"]
         part = chunk.copy()

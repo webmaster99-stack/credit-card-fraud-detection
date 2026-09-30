@@ -52,7 +52,9 @@ uv run python -m monitoring.replay --rows 300 --shift    # all amounts x3: amt d
 
 Needs `API_URL`, `API_KEY`, `DATABASE_URL` in `.env` and `dvc pull` of `data/processed/test.parquet`
 and `data/monitoring/`. Labels are posted `--label-delay` seconds after scoring. Replayed rows stay
-in the prediction log (source `batch`); expect the next nightly report to see them.
+in the prediction log with source `replay` (the batch endpoint's `?source=replay`), and the nightly
+job excludes them, so the demo never trips or masks a real alert. Against an API older than this
+change the parameter is ignored and rows are logged as `batch`; relabel them by hand.
 
 ## Secrets the nightly job needs
 

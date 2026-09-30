@@ -124,6 +124,23 @@ def test_predict_batch_json_list(api_client: TestClient) -> None:
     assert len({r["request_id"] for r in body["results"]}) == 2
 
 
+def test_predict_batch_source_replay_is_stored_and_others_rejected(
+    api_client: TestClient, pg_pool
+) -> None:
+    rows = [dict(TXN, card_id="card-replay-1")]
+    resp = api_client.post(
+        "/v1/predict/batch", params={"source": "replay"}, json=rows, headers=HEADERS
+    )
+    assert resp.status_code == 200, resp.text
+    with pg_pool.connection() as conn:
+        (source,) = conn.execute("SELECT source FROM predictions").fetchone()
+    assert source == "replay"
+    bad = api_client.post(
+        "/v1/predict/batch", params={"source": "single"}, json=rows, headers=HEADERS
+    )
+    assert bad.status_code == 422
+
+
 def test_predict_batch_missing_card_id(api_client: TestClient) -> None:
     rows = [{k: v for k, v in TXN.items() if k != "card_id"}]
     resp = api_client.post("/v1/predict/batch", json=rows, headers=HEADERS)

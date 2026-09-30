@@ -28,6 +28,7 @@ results are awkward to threshold ("3 days running", "flag rate 0.5x-2x") and to 
 ## Consequences
 
 - Alert logic is verified by unit tests; Evidently version drift can only break the HTML report.
-- The nightly job and replay script write to the production database; the replay's rows are
-  indistinguishable from real batch traffic in the prediction log.
+- The nightly job and replay script write to the production database. Replay rows are logged with
+  source `replay` (batch endpoint `?source=replay`) and the nightly job excludes them; the first
+  replays ran before this existed and were relabelled by a one-off UPDATE.
 - Performance monitoring is only as good as the labels posted to `/v1/feedback`.

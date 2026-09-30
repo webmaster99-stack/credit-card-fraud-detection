@@ -40,17 +40,21 @@ _TXN_COLUMNS = [
 ]  # fmt: skip
 
 
-def read_predictions(pool: Any, days: int, source: str | None = None) -> pd.DataFrame:
-    """Logged predictions from the last ``days`` days, with a `day` column (creation date, UTC)."""
+def read_predictions(pool: Any, days: int, exclude_source: str | None = "replay") -> pd.DataFrame:
+    """Logged predictions from the last ``days`` days, with a `day` column (creation date, UTC).
+
+    Rows from ``exclude_source`` (default: the drift-replay demo's `replay`) are left out, so the
+    demo can never trip or mask a production alert.
+    """
     columns = ", ".join([*_TXN_COLUMNS, "flagged", "fraud_probability", "true_label", "created_at"])
     query = (
         f"SELECT {columns} FROM predictions "  # noqa: S608
         "WHERE created_at >= now() - make_interval(days => %(days)s)"
     )
     params: dict[str, Any] = {"days": days}
-    if source is not None:
-        query += " AND source = %(source)s"
-        params["source"] = source
+    if exclude_source is not None:
+        query += " AND source <> %(exclude_source)s"
+        params["exclude_source"] = exclude_source
     with pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
         rows = cur.execute(query, params).fetchall()
     frame = pd.DataFrame(

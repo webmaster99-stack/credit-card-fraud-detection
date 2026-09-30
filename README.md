@@ -140,7 +140,8 @@ and recall on labelled predictions. Thresholds are in `params.yaml` under `monit
 fails when an alert fires. Results and an Evidently report show on the web app's `/monitoring` page.
 `python -m monitoring.replay [--shift]` replays held-out rows through the live API, with and
 without injected amount drift. `docs/runbook.md` covers alerts and retraining; design in ADR 0006.
-Limits: the replay's rows stay in the prediction log, and performance monitoring needs labels
+Limits: replay rows stay in the prediction log (source `replay`, excluded from the checks), and
+performance monitoring needs labels
 posted to `/v1/feedback`.
 
 ## What the data looks like
