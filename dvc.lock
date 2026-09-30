@@ -485,7 +485,7 @@ stages:
               min_child_samples: 20
               subsample: 0.8
               colsample_bytree: 0.8
-              scale_pos_weight: 10.0
+              scale_pos_weight: 1.0
             xgboost:
               n_estimators: 300
               max_depth: 6
@@ -501,5 +501,5 @@ stages:
       size: 678494
     - path: reports/ulb_ladder.json
       hash: md5
-      md5: 5ae7d2af5510d2e1b9c38dd67a136653
-      size: 859
+      md5: ce16610b6c4ced7ce00eceaaf9dca1ec
+      size: 884

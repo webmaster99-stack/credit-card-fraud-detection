@@ -11,7 +11,7 @@
     },
     {
       "step": "random_forest",
-      "threshold": 0.0024418775814824493,
+      "threshold": 0.002441877581482447,
       "precision": 0.5,
       "recall": 0.8170731707317073,
       "met_budget": true,
@@ -19,11 +19,11 @@
     },
     {
       "step": "lightgbm",
-      "threshold": Infinity,
-      "precision": 1.0,
-      "recall": 0.0,
-      "met_budget": false,
-      "pr_auc": 0.1281797712387332
+      "threshold": 0.0004653024786887841,
+      "precision": 0.5,
+      "recall": 0.8048780487804879,
+      "met_budget": true,
+      "pr_auc": 0.751285919779887
     },
     {
       "step": "xgboost",
