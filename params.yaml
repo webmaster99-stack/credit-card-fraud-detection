@@ -137,9 +137,11 @@ monitoring:
   # Rows per side given to the Evidently HTML report. Its size (~4 MB) is the embedded JS bundle
   # and does not depend on this; sampling only cuts the job's runtime (44 s at 50k rows vs 15 s).
   report_sample_rows: 5000
-  # Days of history the nightly job looks back over, and reports kept in the table.
+  # Days of history the nightly job looks back over, and reports kept per kind in the table. Each
+  # nightly report stores ~4 MB of Evidently HTML, and Neon's free tier is 0.5 GB: 14 keeps that
+  # to ~57 MB uncompressed (Postgres compresses it further).
   lookback_days: 14
-  keep_reports: 60
+  keep_reports: 14
 
 tune:
   # Optuna trials per tunable ladder step. Kept modest: DagsHub's free tier caps tracked experiments

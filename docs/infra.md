@@ -143,9 +143,9 @@ Operational notes:
 - **Vercel response cap**: the stored Evidently HTML is ~4.05 MB whatever the sample size (its
   embedded JS bundle), close to Vercel's ~4.5 MB function response limit. The web route
   `web/app/api/monitoring/report/route.ts` gzips it (~1.2 MB on the wire).
-- **Neon storage (open)**: `monitoring_reports` keeps `keep_reports` (60) nightly reports, each with
-  that ~4 MB HTML. Postgres compresses large text, but the worst case is far more than the free
-  tier's 0.5 GB comfortably allows beside the prediction log. Lower `monitoring.keep_reports`
-  (or store the HTML for only the latest report) before leaving the job running for weeks.
+- **Neon storage**: `monitoring_reports` keeps `keep_reports` (14) reports per kind, and each nightly
+  report carries ~4 MB of HTML, so about 57 MB worst case uncompressed (Postgres compresses large
+  text) against the free tier's 0.5 GB. It was 60 at first (~240 MB), lowered to 14. Trimming
+  happens on each save. The prediction log grows separately; watch it if traffic picks up.
 - **Replay data**: the drift replay writes about 300 rows per run to the production prediction log,
   tagged `source = 'replay'` and excluded from the checks (they still count toward Neon storage).

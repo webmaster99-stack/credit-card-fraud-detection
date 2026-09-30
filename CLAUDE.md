@@ -219,8 +219,8 @@ The API returns the model version and pipeline version with every prediction, so
   page on Vercel. `v1.1.1` added `?source=replay` on the batch endpoint: replay rows are logged as
   `replay` and excluded from the nightly checks (the first 900 were relabelled by a one-off UPDATE).
   The Evidently HTML is ~4 MB whatever the sample size (its JS bundle), so the web route sends it
-  gzipped (Vercel's function response cap is ~4.5 MB). Known gaps: `keep_reports: 60` at ~4 MB per
-  nightly report is a lot of Neon's 0.5 GB (`docs/infra.md`); a single small category's amount shift
+  gzipped (Vercel's function response cap is ~4.5 MB). Report retention is `keep_reports: 14` (~4 MB
+  each, sized for Neon's 0.5 GB, `docs/infra.md`). Known gaps: a single small category's amount shift
   is too subtle to trip PSI (the replay's default shifts all amounts); small daily samples on
   high-cardinality features (`state`) sit near the 0.25 PSI threshold. A plain `dvc repro` reruns
   `train` (stale deps) and deletes its outputs before the dirty-tree guard stops it; use
