@@ -182,8 +182,8 @@ stages:
       size: 5286
     - path: src/fraud/models/train.py
       hash: md5
-      md5: dc25e67713b7b4bd65c6ddf16b3de352
-      size: 6064
+      md5: 59a6516c67775277252cebe74eff0f1c
+      size: 6294
     params:
       params.yaml:
         features:
@@ -304,8 +304,8 @@ stages:
       size: 5286
     - path: src/fraud/models/train.py
       hash: md5
-      md5: dc25e67713b7b4bd65c6ddf16b3de352
-      size: 6064
+      md5: 59a6516c67775277252cebe74eff0f1c
+      size: 6294
     params:
       params.yaml:
         demo_model:
