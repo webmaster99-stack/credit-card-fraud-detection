@@ -4,13 +4,12 @@ Fraud classifier for credit card transactions using classical ML, built as a rep
 fully lineaged pipeline (DVC + MLflow). See `CLAUDE.md` for project rules and `docs/plan.md`
 for the phase plan.
 
-Status: Phase 3 (modeling experiments) complete, tag `v0.3-model`. Champion: LightGBM on v2
-(card-history) features, recall 0.986 at precision 0.446 on the single test-set evaluation — see
-Modeling, below. Earlier: `v0.2-features` (Phase 2), `v0.1-eda` (Phase 1), `v0.0-setup` (Phase 0).
-Phase 4 (Gradio demo) complete, tag `v0.4-demo`: the Space is live (link below) and serves a
-stateless v1 model, not the champion (see Demo). Phase 5 (full-stack app) complete, tag `v1.0`: a
-Next.js frontend on Vercel and a FastAPI backend on Render serve the champion (see Full-stack app). Phase 6 (monitoring) complete, tag `v1.1-monitoring` (patch `v1.1.1`;
-see Monitoring). Phase 7 (ULB real-data benchmark) complete, tag `v1.2-ulb` (see ULB benchmark).
+Status: all seven phases are complete (latest tag `v1.2-ulb`). Champion: LightGBM on v2 (card-history)
+features, served by a FastAPI backend on Render behind a Next.js frontend on Vercel; a Gradio demo on
+Hugging Face Spaces serves a stateless v1 model instead (see Demo). Nightly drift monitoring runs in
+GitHub Actions, and a real-data ULB benchmark sits beside the synthetic Sparkov results. Tags:
+`v0.0-setup`, `v0.1-eda`, `v0.2-features`, `v0.3-model`, `v0.4-demo`, `v1.0`, `v1.1-monitoring`
+(patch `v1.1.1`), `v1.2-ulb`.
 
 ## Setup
 
@@ -21,12 +20,17 @@ pre-commit install
 uv run pytest
 ```
 
-## Reproduce the data pipeline
+## Reproduce the pipeline
 
 ```bash
-uv run dvc pull        # fetch data from the DagsHub remote (no Kaggle token needed)
-uv run dvc repro       # ingest -> clean -> split -> features; only re-runs what changed
+uv run dvc pull        # fetch data and models from the DagsHub remote (no Kaggle token needed)
+uv run dvc repro       # rebuilds only what changed; on a fresh clone after `dvc pull` nothing reruns
 ```
+
+Verified from a fresh clone: after `dvc pull` the pipeline is up to date, and a forced retrain reproduces
+the metrics exactly. Model binaries and the last float digit of some report values are not bit-identical
+across reruns (`docs/infra.md`). Training stages refuse to run on a dirty git tree. `.gitattributes`
+pins LF line endings so `dvc.lock` hashes match on Windows, Linux and CI.
 
 `dvc repro ingest` downloads from Kaggle and needs `KAGGLE_API_TOKEN` in `.env`. The stages:
 
@@ -35,6 +39,12 @@ uv run dvc repro       # ingest -> clean -> split -> features; only re-runs what
 | `ingest` | `data/raw/sparkov` | Downloads the Sparkov CSVs from Kaggle |
 | `clean` | `data/interim/transactions.parquet` | Parses types, drops direct identifiers, hashes card numbers, validates with Pandera |
 | `split` | `data/processed/{train,valid,test}.parquet` | Time-based split; summary in `reports/split_summary.json` |
+| `features` | `reports/feature_list_{v1,v2}.json` | Fits both feature tiers on train and checks them on validation |
+| `train` | `data/models/pipeline.joblib` | Fits the champion candidate, calibrates, picks the threshold (logs to MLflow) |
+| `train_demo` | `data/models/demo_pipeline.joblib` | The stateless v1 model the Gradio demo serves |
+| `evaluate` | `reports/evaluate_metrics.json`, `reports/pr_curve.json` | Validation metrics for the trained champion |
+| `monitoring_reference` | `data/monitoring/reference.parquet` | Drift reference for the nightly job |
+| `ulb_ingest`, `ulb_split`, `ulb_train` | `data/raw/ulb`, `data/processed_ulb`, `data/models/ulb_pipeline.joblib` | The ULB benchmark (Phase 7) |
 
 Splits are by time (train Jan 2019 to Jun 2020, validation Jul to Sep 2020, test Oct to Dec 2020), never random.
 The test split is used once, at the end of Phase 3.
@@ -49,6 +59,7 @@ One scikit-learn pipeline per tier, in `src/fraud/features/` (version in `featur
 | `v1` (74 columns) | Transaction (log amount, category, hour, weekday, night flag), customer (age, gender, log city population, state), customer-merchant distance | No |
 | `v2` (84 columns) | v1 plus velocity (count and spend in the last 1 h / 24 h / 7 d) and behavioural (amount vs card mean, hours since last transaction, first use of category, first transaction on card) | Yes, strictly earlier rows only |
 
+One pipeline version (`features-1.0.0`) covers both tiers; the tier is recorded as `feature_set`.
 Encoders, imputers and scalers are fitted on the training split inside the pipeline. The `features` stage fits both
 tiers on train, checks them on validation (train as card history) and writes `reports/feature_list_v1.json` and
 `reports/feature_list_v2.json`. It never reads the test split. Merchant, job and city are dropped for now (see the ADR).
@@ -80,9 +91,11 @@ uv run dvc repro train evaluate   # fits, calibrates, picks a threshold; validat
 ```
 
 **Test-set result (single evaluation, `reports/test_evaluation.json`):** recall 0.986 (CI
-0.978–0.993), precision 0.446 (CI 0.423–0.468, short of the 0.50 target — a real, modest
-generalization gap, reported honestly rather than fixed by re-tuning against test), PR-AUC 0.973
-(CI 0.965–0.980).
+0.978–0.993), precision 0.446 (CI 0.423–0.468), PR-AUC 0.973 (CI 0.965–0.980). The 0.50 precision target
+is a validation threshold rule and is met there (0.500). Test precision is lower because fraud prevalence
+fell from 0.44% to 0.33%: recall (0.990 to 0.986) and the false-alarm rate (0.438% to 0.408%) held or
+improved, so the threshold generalized and the base rate moved. Nothing was re-tuned against the spent
+test split; the arithmetic is in `docs/model_cards/v0.3-model.md`.
 
 ## Demo (Phase 4)
 
@@ -163,7 +176,7 @@ The same protocol on real, anonymised data: the Kaggle ULB European-cardholders 
 transactions over two days, 0.173% fraud, PCA features V1–V28; `docs/data_cards/ulb.md`). It has
 its own stages (`ulb_ingest`, `ulb_split`, `ulb_train`), feature pipeline (`features-ulb-1.0.0`:
 amount scaling and time-of-day only), MLflow experiment (`fraud-detection-ulb`) and registered model
-(`fraud-ulb`, v1 `@champion` = XGBoost). It is never served; the demo and API only use `fraud-classifier`.
+(`fraud-ulb`, v1 `@champion` = XGBoost; model card `docs/model_cards/ulb-v1.2.md`). It is never served; the demo and API only use `fraud-classifier`.
 Split by `Time` (train < 28 h, validation 28–40 h, test after 40 h), threshold picked on validation for
 precision ≥ 0.50, test scored once (`python -m fraud.ulb.evaluate_test`). The four rungs (logistic
 regression, random forest, LightGBM, XGBoost) use fixed, untuned hyperparameters: with 82 frauds in
@@ -195,4 +208,6 @@ a few hours, so it says nothing about drift over months.
 - Full-stack frontend (Vercel): https://fraud-classifier-web.vercel.app
 - Free-tier limits and infra decisions: `docs/infra.md`
 - Design decisions: `docs/adr/`
-- Model cards: `docs/model_cards/v0.3-model.md` (champion), `docs/model_cards/v0.4-demo.md` (demo model)
+- Model cards: `docs/model_cards/v0.3-model.md` (champion and Phase 3 analysis), `docs/model_cards/v1.0-api.md` (served champion),
+  `docs/model_cards/v0.4-demo.md` (demo model), `docs/model_cards/ulb-v1.2.md` (ULB benchmark)
+- Data cards: `docs/data_cards/sparkov.md`, `docs/data_cards/ulb.md`; runbook: `docs/runbook.md`

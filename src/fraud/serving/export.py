@@ -235,9 +235,10 @@ On the **test** split (touched once, Phase 3 protocol step 5):
 | Precision | {t["precision"]:.3f} | {ci["precision"][0]:.3f}-{ci["precision"][1]:.3f} |
 | PR-AUC | {t["pr_auc"]:.3f} | {ci["pr_auc"][0]:.3f}-{ci["pr_auc"][1]:.3f} |
 
-Precision on test misses the project's 0.50 target - a real, modestly-sized generalization gap,
-documented rather than fixed by re-tuning against test. Full analysis (error analysis, fairness by
-age band and gender) is in `docs/model_cards/v0.3-model.md`.
+Precision on test (0.446) is below the 0.50 validation target because fraud prevalence fell from
+0.44% to 0.33%; recall and the false-alarm rate held or improved, so the threshold generalized. It is
+documented rather than fixed by re-tuning against test. Full analysis (prevalence arithmetic, error
+analysis, fairness by age band and gender) is in `docs/model_cards/v0.3-model.md`.
 
 ## Explanations
 

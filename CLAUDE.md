@@ -170,9 +170,9 @@ The API returns the model version and pipeline version with every prediction, so
   xgboost v2 (0.986) and every v1 model (best v1: xgboost, 0.921) — full ladder in
   `reports/model_ladder.json`, notebooks `02_baseline`-`05_explain`, deterministic `train`/`evaluate`
   dvc.yaml stages reproduce it. Single test-set evaluation done (owner-approved): recall 0.986 (CI
-  0.978-0.993), but **precision 0.446 (CI 0.423-0.468) misses the >=0.50 target** — a real, modestly-
-  sized generalization gap, documented rather than fixed by re-tuning against test (see
-  `docs/model_cards/v0.3-model.md`). `fraud-classifier` registered on DagsHub MLflow: v1 (lightgbm
+  0.978-0.993), but **precision 0.446 (CI 0.423-0.468) is below the 0.50 validation target** — a
+  prevalence effect (fraud fell from 0.44% to 0.33%; recall and false-alarm rate held), documented
+  rather than fixed by re-tuning against test (see `docs/model_cards/v0.3-model.md`). `fraud-classifier` registered on DagsHub MLflow: v1 (lightgbm
   v2) `@champion`, v2 (xgboost v2) `@challenger`.
 - Current phase: **Phase 4 — Packaging and Gradio demo** complete, tag `v0.4-demo`. The Space is live and verified on
   ZeroGPU (`docs/infra.md`). The demo serves a stateless v1 model, not the champion (ADR 0004): registry
@@ -270,4 +270,4 @@ Phases 1–7 are in `docs/plan.md`.
 - [x] Champion meets precision ≥ 0.50 on validation, and the test result is explained — *owner decision 2026-10-01: the target is a validation threshold rule and is met (0.500). Test precision is 0.446 (CI 0.423-0.468), below 0.50, because fraud prevalence fell from 0.44% to 0.33%; recall (0.990 → 0.986) and false-alarm rate (0.438% → 0.408%) held or improved. At validation rates and test prevalence precision would be 0.430. Documented in `docs/model_cards/v0.3-model.md`, not re-tuned (test is spent)*
 - [x] Gradio Space and full-stack app both live, sharing one serving codebase and registry — *owner decision 2026-10-01: they deliberately serve different models. The Space serves the stateless v1 `demo` model (`fraud-classifier` v3) and the API serves the history-aware champion (v1), both through `fraud.serving` (ADR 0004, addendum). Not aligned because the champion is worse without card history*
 - [x] Monitoring page shows the drift replay being detected — *live on Vercel, `amt` flagged in the shifted replay*
-- [ ] README, data cards, model cards, ADRs and runbook complete
+- [x] README, data cards, model cards, ADRs and runbook complete — *audited 2026-10-01: added the ULB model card (`docs/model_cards/ulb-v1.2.md`), refreshed the README status and pipeline sections, and aligned the precision wording everywhere; the model card already on the HF Hub still has the old precision sentence until the next `export --push`*
