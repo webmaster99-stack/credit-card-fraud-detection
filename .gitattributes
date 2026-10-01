@@ -1,0 +1,3 @@
+# Pin LF on checkout: dvc.lock hashes code files byte for byte, so Windows autocrlf (CRLF)
+# would make every dep look modified in a fresh clone and force dvc repro to rerun everything.
+* text=auto eol=lf
