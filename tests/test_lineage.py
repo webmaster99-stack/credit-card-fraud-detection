@@ -55,6 +55,25 @@ def test_dirty_tree_ignore_does_not_hide_other_changes(repo: Path) -> None:
         ensure_clean_tree(repo, ignore=("a.txt",))
 
 
+def test_dirty_tree_ignores_dvc_written_files(repo: Path) -> None:
+    # A multi-stage `dvc repro` rewrites dvc.lock and upstream cache:false reports before `train`.
+    (repo / "dvc.yaml").write_text(
+        "stages:\n  s:\n    cmd: x\n    outs:\n      - data/raw\n"
+        "    metrics:\n      - reports/m.json:\n          cache: false\n"
+    )
+    (repo / "reports").mkdir()
+    (repo / "reports" / "m.json").write_text("{}")
+    (repo / "dvc.lock").write_text("a")
+    subprocess.run(["git", "add", "."], cwd=repo, check=True, capture_output=True)
+    subprocess.run(["git", "commit", "-m", "dvc"], cwd=repo, check=True, capture_output=True)
+    (repo / "reports" / "m.json").write_text('{"x": 1}')
+    (repo / "dvc.lock").write_text("b")
+    ensure_clean_tree(repo)
+    (repo / "a.txt").write_text("changed")
+    with pytest.raises(DirtyTreeError):
+        ensure_clean_tree(repo)
+
+
 def test_git_commit_is_short_sha(repo: Path) -> None:
     assert len(git_commit(repo)) >= 7
 

@@ -47,16 +47,38 @@ def git_commit(repo: Path = REPO_ROOT) -> str:
     return _git("rev-parse", "--short", "HEAD", cwd=repo)
 
 
+def dvc_written_paths(repo: Path = REPO_ROOT) -> set[str]:
+    """Git-tracked files that `dvc repro` itself writes: `dvc.lock` and every `cache: false`
+    output, metric and plot declared in `dvc.yaml`. Cached outputs are git-ignored, so they never
+    show up in `git status` and need no entry."""
+    paths = {"dvc.lock"}
+    dvc_yaml = repo / "dvc.yaml"
+    if not dvc_yaml.exists():
+        return paths
+    stages = (yaml.safe_load(dvc_yaml.read_text(encoding="utf-8")) or {}).get("stages") or {}
+    for stage in stages.values():
+        for key in ("outs", "metrics", "plots"):
+            for entry in stage.get(key) or []:
+                if isinstance(entry, dict):
+                    for path, opts in entry.items():
+                        if isinstance(opts, dict) and opts.get("cache") is False:
+                            paths.add(path)
+    return paths
+
+
 def ensure_clean_tree(repo: Path = REPO_ROOT, ignore: tuple[str, ...] = ()) -> None:
-    """Refuse a dirty tree, except for changes to `ignore` (relative paths).
+    """Refuse a dirty tree, except for changes to `ignore` (relative paths) and to the files
+    `dvc repro` itself writes (see `dvc_written_paths`).
 
     `dvc repro` removes a stage's own declared outputs before running its command, which shows up as
     a pending change to that stage's own report file before the script gets a chance to write it.
-    That is not the "uncommitted code/params" case this check exists for, so a stage may name its
-    own output path here.
+    It also rewrites `dvc.lock` and the upstream stages' reports after each stage, so a multi-stage
+    `dvc repro` would otherwise trip this check at `train` whenever an earlier stage had just run.
+    None of that is the "uncommitted code/params" case this check exists for.
     """
+    allowed = set(ignore) | dvc_written_paths(repo)
     lines = _git_lines("status", "--porcelain", cwd=repo)
-    dirty = [line for line in lines if line[3:] not in ignore]
+    dirty = [line for line in lines if line[3:] not in allowed]
     if dirty:
         raise DirtyTreeError("Refusing to run: git tree has uncommitted changes.")
 
