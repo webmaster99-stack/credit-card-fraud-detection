@@ -44,7 +44,7 @@ def build_set(
         raise ValueError(f"{feature_set}: row count changed during transform.")
     listing = feature_list(pipeline, train_features, feature_set)
     feature_list_path(feature_set).write_text(
-        json.dumps(listing, indent=2) + "\n", encoding="utf-8"
+        json.dumps(listing, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
     return {"n_features": listing["n_features"], "train_rows": len(train_features)}
 
@@ -59,7 +59,7 @@ def main() -> None:
     for feature_set in FEATURE_SETS:
         summary[feature_set] = build_set(feature_set, cfg, train, valid)
         print(f"{feature_set}: {summary[feature_set]['n_features']} features")
-    SUMMARY_PATH.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    SUMMARY_PATH.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8", newline="\n")
 
 
 if __name__ == "__main__":

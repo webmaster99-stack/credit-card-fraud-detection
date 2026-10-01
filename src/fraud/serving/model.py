@@ -122,9 +122,13 @@ def write_bundle(
     listing = feature_list(features, transformed, metadata["feature_set"])
 
     joblib.dump(pipeline, out_dir / PIPELINE_FILE)
-    (out_dir / METADATA_FILE).write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
-    (out_dir / FEATURE_LIST_FILE).write_text(json.dumps(listing, indent=2) + "\n", encoding="utf-8")
-    (out_dir / MODEL_CARD_FILE).write_text(model_card, encoding="utf-8")
+    (out_dir / METADATA_FILE).write_text(
+        json.dumps(metadata, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
+    (out_dir / FEATURE_LIST_FILE).write_text(
+        json.dumps(listing, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
+    (out_dir / MODEL_CARD_FILE).write_text(model_card, encoding="utf-8", newline="\n")
     template.to_csv(out_dir / TEMPLATE_FILE, index=False)
     cities.to_csv(out_dir / CITIES_FILE, index=False)
     examples.to_csv(out_dir / EXAMPLES_FILE, index=False)

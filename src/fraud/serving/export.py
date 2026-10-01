@@ -304,7 +304,7 @@ def main() -> None:
     )
     write_bundle(out_dir, pipeline, metadata, model_card=card, cities=cities, examples=examples)
     card_path.parent.mkdir(parents=True, exist_ok=True)
-    card_path.write_text(card, encoding="utf-8")
+    card_path.write_text(card, encoding="utf-8", newline="\n")
     print(f"Bundle for {REGISTERED_MODEL_NAME} v{version.version} (@{args.alias}) -> {out_dir}")
     print(f"Model card -> {card_path} (also {out_dir / MODEL_CARD_FILE})")
 

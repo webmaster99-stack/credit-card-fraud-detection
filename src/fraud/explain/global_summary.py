@@ -43,7 +43,9 @@ def main() -> None:
         "top_features": [{"feature": f, "mean_abs_shap": v} for f, v in ranking[:20]],
     }
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    SHAP_SUMMARY_PATH.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    SHAP_SUMMARY_PATH.write_text(
+        json.dumps(summary, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     print(json.dumps(summary, indent=2))
 
 

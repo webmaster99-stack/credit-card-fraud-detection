@@ -89,7 +89,9 @@ def main() -> None:
         result = {"step": model_cfg["step"], "feature_set": model_cfg["feature_set"], **result}
 
         REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-        TEST_METRICS_PATH.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+        TEST_METRICS_PATH.write_text(
+            json.dumps(result, indent=2) + "\n", encoding="utf-8", newline="\n"
+        )
         mlflow.log_metrics({k: v for k, v in result.items() if isinstance(v, int | float)})
         mlflow.log_artifact(str(TEST_METRICS_PATH))
 

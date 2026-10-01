@@ -107,7 +107,9 @@ def main() -> None:
         MODEL_DIR.mkdir(parents=True, exist_ok=True)
         joblib.dump(full_pipeline, model_path)
         REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-        metrics_path.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
+        metrics_path.write_text(
+            json.dumps(metrics, indent=2) + "\n", encoding="utf-8", newline="\n"
+        )
 
         mlflow.log_params(
             {

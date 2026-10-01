@@ -40,7 +40,7 @@ def main() -> None:
         "test_recall": test["recall"],
         "test_precision": test["precision"],
     }
-    STATS_PATH.write_text(json.dumps(stats, indent=2) + "\n", encoding="utf-8")
+    STATS_PATH.write_text(json.dumps(stats, indent=2) + "\n", encoding="utf-8", newline="\n")
 
 
 if __name__ == "__main__":

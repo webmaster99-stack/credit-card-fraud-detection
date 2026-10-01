@@ -62,8 +62,8 @@ def main() -> None:
         full_pipeline, train, valid, params["model"]["fn_cost"], params["model"]["fp_cost"]
     )
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    METRICS_PATH.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
-    PR_CURVE_PATH.write_text(json.dumps(curve) + "\n", encoding="utf-8")
+    METRICS_PATH.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8", newline="\n")
+    PR_CURVE_PATH.write_text(json.dumps(curve) + "\n", encoding="utf-8", newline="\n")
     print(json.dumps(metrics, indent=2))
 
 

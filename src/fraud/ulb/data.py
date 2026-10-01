@@ -97,7 +97,9 @@ def main() -> None:
         part.to_parquet(PROCESSED_DIR / f"{name}.parquet", index=False)
     summary = summarize(parts)
     SPLIT_SUMMARY_PATH.parent.mkdir(parents=True, exist_ok=True)
-    SPLIT_SUMMARY_PATH.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    SPLIT_SUMMARY_PATH.write_text(
+        json.dumps(summary, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     for name, s in summary.items():
         print(f"{name}: {s['rows']:,} rows, {s['frauds']:,} frauds ({s['fraud_rate']:.3%})")
 

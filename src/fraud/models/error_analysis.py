@@ -92,7 +92,7 @@ def main() -> None:
 
     error_report = sample_errors(test, params["seed"])
     ERROR_SAMPLE_PATH.write_text(
-        json.dumps(error_report, indent=2, default=str) + "\n", encoding="utf-8"
+        json.dumps(error_report, indent=2, default=str) + "\n", encoding="utf-8", newline="\n"
     )
 
     age_years = (test["trans_ts"] - test["dob"]).dt.days / 365.25
@@ -101,7 +101,7 @@ def main() -> None:
         "by_age_band": group_metrics(test["is_fraud"], test["predicted"], age_band),
         "by_gender": group_metrics(test["is_fraud"], test["predicted"], test["gender"]),
     }
-    FAIRNESS_PATH.write_text(json.dumps(fairness, indent=2) + "\n", encoding="utf-8")
+    FAIRNESS_PATH.write_text(json.dumps(fairness, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(json.dumps(fairness, indent=2))
 
 

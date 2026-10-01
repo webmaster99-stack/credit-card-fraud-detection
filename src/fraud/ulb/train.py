@@ -133,7 +133,9 @@ def main() -> None:
     joblib.dump(winner, MODEL_PATH)
     LADDER_PATH.parent.mkdir(parents=True, exist_ok=True)
     LADDER_PATH.write_text(
-        json.dumps({"best": best["step"], "steps": results}, indent=2) + "\n", encoding="utf-8"
+        json.dumps({"best": best["step"], "steps": results}, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
     print(f"best: {best['step']} (recall {best['recall']:.3f} @ precision {best['precision']:.3f})")
 

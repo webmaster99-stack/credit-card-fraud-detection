@@ -63,7 +63,9 @@ def main() -> None:
         result = evaluate_on_test(
             pipeline, test, ulb["fn_cost"], ulb["fp_cost"], args.n_boot, params["seed"]
         )
-        TEST_EVALUATION_PATH.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+        TEST_EVALUATION_PATH.write_text(
+            json.dumps(result, indent=2) + "\n", encoding="utf-8", newline="\n"
+        )
         mlflow.log_metrics({k: v for k, v in result.items() if isinstance(v, int | float)})
         mlflow.log_artifact(str(TEST_EVALUATION_PATH))
     print(json.dumps(result, indent=2))
