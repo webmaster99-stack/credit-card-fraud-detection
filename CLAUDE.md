@@ -150,7 +150,7 @@ The API returns the model version and pipeline version with every prediction, so
 | `git_commit` | `a1b2c3d` | Exact code |
 | `dataset_name`, `dataset_version` | `sparkov`, `v1` | Which data |
 | `dvc_data_md5` | hash of `data/processed` from `dvc.lock` | Proves the exact files |
-| `pipeline_version` | `features-1.2.0` (semver in `src/fraud/features/__init__.py`) | Which preprocessing code |
+| `pipeline_version` | `features-1.0.0` (semver in `src/fraud/features/__init__.py`; one version covers both tiers, `feature_set` v1/v2 tells them apart, ADR 0003) | Which preprocessing code |
 | `feature_list.json` | artifact: final columns and dtypes | Which features |
 | `split_spec` | train Jan 2019–Jun 2020, valid Jul–Sep 2020, test Oct–Dec 2020 | Which rows |
 | `params.yaml`, `requirements.lock` | artifacts | Rebuild environment |
@@ -201,9 +201,7 @@ The API returns the model version and pipeline version with every prediction, so
   couldn't build a v2 bundle's `feature_list.json`, and `trans_ts` round-tripped through `TIMESTAMPTZ`
   broke concatenation with naive request rows (now `TIMESTAMP`). Known gaps, carried forward:
   the champion's decision threshold is very low (0.000305) and the ordinary test transaction scored just
-  under it, worth revisiting given test precision 0.446; the served `pipeline_version` reads
-  `features-1.0.0` for the v2 feature set, so the version was probably never bumped for the v2 features;
-  the frontend's predict and batch pages were not exercised end-to-end (`/v1/feedback` was, by the
+  under it, worth revisiting given test precision 0.446; the frontend's predict and batch pages were not exercised end-to-end (`/v1/feedback` was, by the
   Phase 6 replay against the live API); the local
   `docker build` was never run (C: drive was full; CI and Render build the same Dockerfile);
   `ALLOWED_ORIGINS` is still the localhost default (browsers never call the API directly). See
