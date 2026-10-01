@@ -265,7 +265,7 @@ Phases 1–7 are in `docs/plan.md`.
 
 ## Definition of done
 
-- [ ] A stranger can clone the repo, run `dvc pull && dvc repro`, and get the same metrics
+- [x] A stranger can clone the repo, run `dvc pull && dvc repro`, and get the same metrics — *verified from a fresh clone on 2026-10-01: pipeline up to date after `dvc pull`, forced retrain reproduced the metrics exactly. Caveat: retrained model binaries and the last float digit (~1e-16) of some report values are not bit-identical, so `evaluate` shows stale after a retrain. `.gitattributes` pins LF and scripts write LF so `dvc.lock` hashes match across OSes*
 - [ ] Every registered model shows its commit, dataset version, pipeline version and feature list
 - [ ] Champion meets precision ≥ 0.50 on the untouched test set
 - [ ] Gradio Space and full-stack app both live, serving the same model version
