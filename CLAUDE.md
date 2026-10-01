@@ -201,7 +201,7 @@ The API returns the model version and pipeline version with every prediction, so
   couldn't build a v2 bundle's `feature_list.json`, and `trans_ts` round-tripped through `TIMESTAMPTZ`
   broke concatenation with naive request rows (now `TIMESTAMP`). Known gaps, carried forward:
   the champion's decision threshold is very low (0.000305) and the ordinary test transaction scored just
-  under it (test precision 0.446 is a prevalence effect, see the Definition of done); the local `docker build` was never run (C: drive was full; CI and Render build the same Dockerfile).
+  under it (test precision 0.446 is a prevalence effect, see the Definition of done); the local `docker build` was run on 2026-10-01 (375 s, image 5.27 GB): it serves the champion against the compose Postgres, matches the live API's prediction exactly, and returns 401 without the key.
   The frontend's predict and batch pages were tested end-to-end on 2026-10-01 (live; cold-start handling added in
   `web/`), and `ALLOWED_ORIGINS` is set to the Vercel URL on Render. See
   `docs/plan.md` for the task list.
