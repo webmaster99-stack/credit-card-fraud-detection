@@ -30,3 +30,21 @@ arrives in Phase 5. `docs/plan.md` therefore says the demo ships the v1 stateles
 - The registry now holds three versions: v1 `@champion`, v2 `@challenger`, v3 `@demo`.
 - Gender is a model input and can appear among the reasons. That is what the model uses; the fairness caveat from
   the champion's card is repeated in the demo's limitations.
+
+## Addendum (2026-10-01): the demo and the API stay on different models
+
+The Definition of done asked for the Space and the API to serve the same model version. We checked
+whether the demo could serve the champion instead. Scoring the validation split with the champion
+and every row treated as a never-seen card (no history, as the single-transaction form would be):
+
+| Model, no card history | Recall at precision ≥ 0.50 (validation) | At its own threshold |
+| --- | --- | --- |
+| Champion (lightgbm, v2 features) | 0.812 | recall 0.971, precision 0.091 (about 11,000 flags) |
+| Demo (xgboost, v1 features) | 0.921 | recall 0.921, precision 0.500 |
+
+Without history the champion is worse than the model the demo already serves, and its threshold
+(chosen for history-aware scores) flags far too much. Serving it in the Space would need history
+inputs in the form or a call to the live API, both larger changes than this phase warrants.
+Decision (owner): keep both. The two share the `fraud.serving` package, the model registry and the
+export format, so they cannot disagree about how a given model scores; they differ in which model
+and whether card history is available, which the demo's About tab and the README both state.
