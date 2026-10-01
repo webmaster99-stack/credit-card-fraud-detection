@@ -100,16 +100,16 @@ stages:
       size: 128
     - path: src/fraud/features/build.py
       hash: md5
-      md5: b788e2f167d8bdb97079dc058d733328
-      size: 2434
+      md5: 0f3367712dcb101f160f52c7b9c66440
+      size: 2448
     - path: src/fraud/features/history.py
       hash: md5
-      md5: 2a511198e7ee48d23daa1ad0548ca62f
+      md5: 00b3c8c1320e61de7be8689b2c60e0fe
       size: 5471
     - path: src/fraud/features/pipeline.py
       hash: md5
-      md5: d1aca764994e54cc72b924708a9d8f2e
-      size: 4307
+      md5: 7836990b5efc0935e1a16a9e94993c0c
+      size: 4362
     - path: src/fraud/features/transformers.py
       hash: md5
       md5: 3edfbc78b971ef8dafeee6cddbd5c56b
@@ -182,8 +182,8 @@ stages:
       size: 5286
     - path: src/fraud/models/train.py
       hash: md5
-      md5: 87f5668fa1e8c12998b374578245ed66
-      size: 5152
+      md5: f1b7ba5efa663c995b473750638a9c66
+      size: 6028
     params:
       params.yaml:
         features:
@@ -213,8 +213,8 @@ stages:
     outs:
     - path: data/models/pipeline.joblib
       hash: md5
-      md5: d7f5eeb5c6fc35a46f122842cd27ed60
-      size: 6347646
+      md5: 1f4f9f4ca7f5b65e78f8b526978ca60f
+      size: 6346990
     - path: reports/train_metrics.json
       hash: md5
       md5: 9348f613740b10b55b1cb3e902825314
@@ -224,8 +224,8 @@ stages:
     deps:
     - path: data/models/pipeline.joblib
       hash: md5
-      md5: d7f5eeb5c6fc35a46f122842cd27ed60
-      size: 6347646
+      md5: 1f4f9f4ca7f5b65e78f8b526978ca60f
+      size: 6346990
     - path: data/processed/train.parquet
       hash: md5
       md5: 79b308ad766f5b787e3fd7c8b4b6fe19
