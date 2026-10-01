@@ -3,7 +3,9 @@
 import { FormEvent, useState } from "react";
 
 import { VerdictCard } from "@/components/VerdictCard";
+import { problemsFrom } from "@/lib/messages";
 import { CATEGORIES, type PredictResult, type Transaction } from "@/lib/types";
+import { useSlowLoading } from "@/lib/useSlowLoading";
 
 const INITIAL: Transaction = {
   trans_ts: "2020-11-05T18:42:10",
@@ -29,6 +31,7 @@ export default function SingleTransactionPage() {
   const [result, setResult] = useState<PredictResult | null>(null);
   const [problems, setProblems] = useState<string[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const slow = useSlowLoading(loading);
 
   function update<K extends keyof Transaction>(key: K, value: Transaction[K]) {
     setTxn((prev) => ({ ...prev, [key]: value }));
@@ -45,9 +48,9 @@ export default function SingleTransactionPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(txn),
       });
-      const body = await res.json();
-      if (!res.ok) {
-        setProblems(Array.isArray(body.detail) ? body.detail : [String(body.detail)]);
+      const body = await res.json().catch(() => null);
+      if (!res.ok || body === null) {
+        setProblems(problemsFrom(body, res.status));
       } else {
         setResult(body as PredictResult);
       }
@@ -211,6 +214,12 @@ export default function SingleTransactionPage() {
         >
           {loading ? "Scoring..." : "Score transaction"}
         </button>
+        {slow && (
+          <p className="text-sm text-amber-700 dark:text-amber-300">
+            This is taking a while - the free-tier model service sleeps when idle and can take
+            about a minute to wake. Your request is still running.
+          </p>
+        )}
       </form>
 
       <div>

@@ -7,6 +7,7 @@ import type {
 } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 async function load<T>(kind: "nightly" | "replay"): Promise<MonitoringReport<T> | null | "error"> {
   try {

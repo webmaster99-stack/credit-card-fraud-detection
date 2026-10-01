@@ -2,7 +2,9 @@
 
 import { FormEvent, useState } from "react";
 
+import { problemsFrom } from "@/lib/messages";
 import type { BatchResult } from "@/lib/types";
+import { useSlowLoading } from "@/lib/useSlowLoading";
 
 function percent(p: number): string {
   return `${(p * 100).toFixed(1)}%`;
@@ -33,6 +35,7 @@ export default function BatchPage() {
   const [result, setResult] = useState<BatchResult | null>(null);
   const [problems, setProblems] = useState<string[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const slow = useSlowLoading(loading);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -44,9 +47,9 @@ export default function BatchPage() {
     form.append("file", file, file.name);
     try {
       const res = await fetch("/api/predict/batch", { method: "POST", body: form });
-      const body = await res.json();
-      if (!res.ok) {
-        setProblems(Array.isArray(body.detail) ? body.detail : [String(body.detail)]);
+      const body = await res.json().catch(() => null);
+      if (!res.ok || body === null) {
+        setProblems(problemsFrom(body, res.status));
       } else {
         setResult(body as BatchResult);
       }
@@ -83,6 +86,13 @@ export default function BatchPage() {
           {loading ? "Scoring..." : "Score file"}
         </button>
       </form>
+
+      {slow && (
+        <p className="text-sm text-amber-700 dark:text-amber-300">
+          This is taking a while - the free-tier model service sleeps when idle and can take
+          about a minute to wake. Your request is still running.
+        </p>
+      )}
 
       {problems && (
         <div className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200">

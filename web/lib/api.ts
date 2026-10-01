@@ -8,6 +8,7 @@ import type {
   PredictResult,
   Transaction,
 } from "./types";
+import { WAKING_MESSAGE } from "./messages";
 
 const BASE_URL = process.env.FRAUD_API_URL;
 const API_KEY = process.env.FRAUD_API_KEY;
@@ -30,11 +31,32 @@ function settings(): { baseUrl: string; apiKey: string } {
   return { baseUrl: BASE_URL, apiKey: API_KEY };
 }
 
-async function call(path: string, init: RequestInit = {}): Promise<Response> {
+/** Longer than the ~53 s a sleeping Render free-tier service took to wake when measured, and
+ * shorter than the routes' `maxDuration` (60 s), so a wake-up that is not finished yet becomes a
+ * clear "try again" error here instead of the platform killing the function. */
+const API_TIMEOUT_MS = 55_000;
+
+async function call(
+  path: string,
+  init: RequestInit = {},
+  timeoutMs: number = API_TIMEOUT_MS,
+): Promise<Response> {
   const { baseUrl, apiKey } = settings();
   const headers = new Headers(init.headers);
   headers.set("X-API-Key", apiKey);
-  return fetch(`${baseUrl}${path}`, { ...init, headers, cache: "no-store" });
+  try {
+    return await fetch(`${baseUrl}${path}`, {
+      ...init,
+      headers,
+      cache: "no-store",
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  } catch (err) {
+    if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
+      throw new FraudApiError(504, [WAKING_MESSAGE]);
+    }
+    throw err;
+  }
 }
 
 async function callJson<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -101,10 +123,14 @@ export async function apiMonitoringReportHtml(): Promise<string | null> {
 }
 
 /** Never throws: a health check that itself fails just means "not ok" (e.g. the Render free-tier
- * service is asleep and hasn't answered yet), which is exactly what the caller wants to show. */
+ * service is asleep and hasn't answered yet), which is exactly what the caller wants to show. The
+ * short timeout matters: without it a sleeping service made this call hang until it woke, so the
+ * "waking up" banner only appeared once there was nothing left to wait for. */
+const HEALTH_TIMEOUT_MS = 3_000;
+
 export async function apiHealth(): Promise<HealthInfo> {
   try {
-    const res = await call("/health");
+    const res = await call("/health", {}, HEALTH_TIMEOUT_MS);
     const body = await res.json();
     return body as HealthInfo;
   } catch {
