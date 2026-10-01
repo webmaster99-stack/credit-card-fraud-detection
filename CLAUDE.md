@@ -201,7 +201,7 @@ The API returns the model version and pipeline version with every prediction, so
   couldn't build a v2 bundle's `feature_list.json`, and `trans_ts` round-tripped through `TIMESTAMPTZ`
   broke concatenation with naive request rows (now `TIMESTAMP`). Known gaps, carried forward:
   the champion's decision threshold is very low (0.000305) and the ordinary test transaction scored just
-  under it, worth revisiting given test precision 0.446; the frontend's predict and batch pages were not exercised end-to-end (`/v1/feedback` was, by the
+  under it (test precision 0.446 is a prevalence effect, see the Definition of done); the frontend's predict and batch pages were not exercised end-to-end (`/v1/feedback` was, by the
   Phase 6 replay against the live API); the local
   `docker build` was never run (C: drive was full; CI and Render build the same Dockerfile);
   `ALLOWED_ORIGINS` is still the localhost default (browsers never call the API directly). See
@@ -266,8 +266,8 @@ Phases 1–7 are in `docs/plan.md`.
 ## Definition of done
 
 - [x] A stranger can clone the repo, run `dvc pull && dvc repro`, and get the same metrics — *verified from a fresh clone on 2026-10-01: pipeline up to date after `dvc pull`, forced retrain reproduced the metrics exactly. Caveat: retrained model binaries and the last float digit (~1e-16) of some report values are not bit-identical, so `evaluate` shows stale after a retrain. `.gitattributes` pins LF and scripts write LF so `dvc.lock` hashes match across OSes*
-- [ ] Every registered model shows its commit, dataset version, pipeline version and feature list
-- [ ] Champion meets precision ≥ 0.50 on the untouched test set
+- [x] Every registered model shows its commit, dataset version, pipeline version and feature list — *checked 2026-10-01 across `fraud-classifier` v1-v3 and `fraud-ulb` v1; `feature_list.json` was backfilled on the three `fraud-classifier` runs from git (tagged `feature_list_source`) and `train` now logs it; `dvc_data_md5` on v1-v3 is historical (`docs/infra.md`)*
+- [x] Champion meets precision ≥ 0.50 on validation, and the test result is explained — *owner decision 2026-10-01: the target is a validation threshold rule and is met (0.500). Test precision is 0.446 (CI 0.423-0.468), below 0.50, because fraud prevalence fell from 0.44% to 0.33%; recall (0.990 → 0.986) and false-alarm rate (0.438% → 0.408%) held or improved. At validation rates and test prevalence precision would be 0.430. Documented in `docs/model_cards/v0.3-model.md`, not re-tuned (test is spent)*
 - [ ] Gradio Space and full-stack app both live, serving the same model version
 - [x] Monitoring page shows the drift replay being detected — *live on Vercel, `amt` flagged in the shifted replay*
 - [ ] README, data cards, model cards, ADRs and runbook complete
