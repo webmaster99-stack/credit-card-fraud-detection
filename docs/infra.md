@@ -91,8 +91,8 @@ Steps 1-3 are done. The API is live on Render and `GET /health` returns
 | Render service | `credit-card-fraud-detection` (free plan, Frankfurt, Docker runtime, `api/Dockerfile`, root `.`) |
 | URL | `https://credit-card-fraud-detection-5reg.onrender.com` |
 | Postgres | Neon, pooled endpoint (`-pooler`), `sslmode=require&channel_binding=require` |
-| Env vars set | `DATABASE_URL`, `API_KEY`, `MODEL_REVISION=champion` |
-| Env vars not set | `ALLOWED_ORIGINS` (defaults to `http://localhost:3000`). Browsers never call the API directly (every call goes through the Next.js route handlers on the server), so CORS does not block the frontend; set it to the Vercel URL only if a browser client ever calls the API itself. |
+| Env vars set | `DATABASE_URL`, `API_KEY`, `MODEL_REVISION=champion`, `ALLOWED_ORIGINS=https://fraud-classifier-web.vercel.app` (set 2026-10-01) |
+| CORS | `ALLOWED_ORIGINS` lists only the Vercel frontend. Browsers never call the API directly (every call goes through the Next.js route handlers on the server), so this does not affect the frontend; it keeps other browser origins out. Checked after the change: a preflight from the Vercel origin returns `access-control-allow-origin`, and from `http://localhost:3000` or another origin returns 400. The code default stays `http://localhost:3000` for local development. Setting an env var on Render triggers a deploy of the current `main` commit, not the last tag. |
 | Deploys | Render auto-deploy is off; `deploy-api` in `ci.yml` fires the `RENDER_DEPLOY_HOOK_URL` secret's hook on `v*` tag pushes, after tests and the image build pass. |
 | Vercel | Project `fraud-classifier-web`, https://fraud-classifier-web.vercel.app (step 5 done). Server-side env vars `FRAUD_API_URL` and `FRAUD_API_KEY` on Production and Preview. `FRAUD_API_KEY` must equal Render's `API_KEY`; it was stale after the key rotation and was updated by the owner. |
 

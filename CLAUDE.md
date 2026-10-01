@@ -201,10 +201,9 @@ The API returns the model version and pipeline version with every prediction, so
   couldn't build a v2 bundle's `feature_list.json`, and `trans_ts` round-tripped through `TIMESTAMPTZ`
   broke concatenation with naive request rows (now `TIMESTAMP`). Known gaps, carried forward:
   the champion's decision threshold is very low (0.000305) and the ordinary test transaction scored just
-  under it (test precision 0.446 is a prevalence effect, see the Definition of done); the frontend's predict and batch pages were not exercised end-to-end (`/v1/feedback` was, by the
-  Phase 6 replay against the live API); the local
-  `docker build` was never run (C: drive was full; CI and Render build the same Dockerfile);
-  `ALLOWED_ORIGINS` is still the localhost default (browsers never call the API directly). See
+  under it (test precision 0.446 is a prevalence effect, see the Definition of done); the local `docker build` was never run (C: drive was full; CI and Render build the same Dockerfile).
+  The frontend's predict and batch pages were tested end-to-end on 2026-10-01 (live; cold-start handling added in
+  `web/`), and `ALLOWED_ORIGINS` is set to the Vercel URL on Render. See
   `docs/plan.md` for the task list.
 - Current phase: **Phase 6 — Monitoring** complete, tag `v1.1-monitoring`, plus patch `v1.1.1`.
   `src/fraud/monitoring/` (PSI/Wasserstein/alert logic, thresholds in `params.yaml`), nightly GitHub
