@@ -21,7 +21,7 @@ import pandas as pd
 from sklearn.pipeline import Pipeline
 
 from fraud.data.paths import PROCESSED_DIR
-from fraud.features.pipeline import build_pipeline, transform_with_context
+from fraud.features.pipeline import build_pipeline, feature_list, transform_with_context
 from fraud.models.estimator import CalibratedThresholdClassifier
 from fraud.models.ladder import build_estimator
 from fraud.models.lineage import start_run
@@ -124,6 +124,11 @@ def main() -> None:
         )
         mlflow.log_metric("met_budget", float(metrics["met_budget"]))
         example = train.iloc[:2]
+        features = full_pipeline.named_steps["features"]
+        mlflow.log_dict(
+            feature_list(features, features.transform(example), model_cfg["feature_set"]),
+            "feature_list.json",
+        )
         signature = mlflow.models.infer_signature(example, full_pipeline.predict_proba(example))
         mlflow.sklearn.log_model(
             full_pipeline,

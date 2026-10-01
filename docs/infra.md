@@ -149,3 +149,21 @@ Operational notes:
   happens on each save. The prediction log grows separately; watch it if traffic picks up.
 - **Replay data**: the drift replay writes about 300 rows per run to the production prediction log,
   tagged `source = 'replay'` and excluded from the checks (they still count toward Neon storage).
+
+## Reproducibility notes (2026-10-01)
+
+- **`dvc_data_md5` on the registered models is historical.** `fraud-classifier` v1-v3 carry
+  `a03532b1de5c77f62c501042f7ce782e.dir` for `data/processed`; `dvc.lock` now holds
+  `52c578c56b9bdccf30ce7a93b70d0d55.dir`. The three splits are identical in content (checked with
+  `DataFrame.equals`); only the parquet metadata differs by 60 bytes per file. The Phase 1 lockfile
+  pinned pandas 3.0.6 and the current `uv.lock` pins 2.3.3, so a rerun of `split` writes different
+  pandas schema metadata. The old hash is recoverable from `git show f9a1657:dvc.lock` and the DVC
+  remote.
+- **Not bit-exact on rerun.** A retrain gives the same metrics, but the model binary hash and the last
+  float digit (~1e-16) of some report values differ, so `evaluate` shows stale after a retrain.
+- **Line endings.** `.gitattributes` pins LF and every report-writing script passes `newline="
+"`, so
+  `dvc.lock` hashes match on Windows, Linux and CI.
+- **`feature_list.json`.** The `train` stage logs it from now on. The three `fraud-classifier` runs
+  predate that, so it was backfilled from `reports/feature_list_<set>.json` at each run's commit; those
+  runs carry a `feature_list_source` tag saying so.
