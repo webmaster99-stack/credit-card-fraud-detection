@@ -141,13 +141,18 @@ def build_alerts(
     perf: dict[str, Any],
     invalid_fraction: float,
     error_rate: float | None,
+    n_requests: int,
     cfg: dict[str, Any],
 ) -> list[dict[str, str]]:
-    """Alerts per the plan's table. ``daily``: oldest first, each with `n`, `n_drifted`, `flag`."""
+    """Alerts per the plan's table. ``daily``: oldest first, each with `n`, `n_drifted`, `flag`.
+
+    The two request-rate alerts need `min_requests_for_rates` requests behind them.
+    """
     alerts: list[dict[str, str]] = []
-    if error_rate is not None and error_rate > float(cfg["max_error_rate"]):
+    enough_requests = n_requests >= int(cfg["min_requests_for_rates"])
+    if enough_requests and error_rate is not None and error_rate > float(cfg["max_error_rate"]):
         alerts.append({"layer": "service", "message": f"Error rate {error_rate:.1%} is above 1%."})
-    if invalid_fraction > float(cfg["max_invalid_fraction"]):
+    if enough_requests and invalid_fraction > float(cfg["max_invalid_fraction"]):
         alerts.append(
             {
                 "layer": "data_quality",

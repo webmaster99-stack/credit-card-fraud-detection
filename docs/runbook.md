@@ -20,7 +20,11 @@ performance check only has data once `/v1/feedback` labels accumulate.
 | `performance` | Recall on labelled predictions drops more than 10 points below test recall | The model misses fraud it used to catch | Needs >= 30 labels. Check label quality first (are only flagged rows being labelled? that biases recall). |
 
 Days with fewer than `min_rows_per_day` (50) logged predictions are ignored for drift and
-flag-rate checks; a quiet demo will not alert.
+flag-rate checks; a quiet demo will not alert. Likewise the `service` and `data_quality` rates only
+alert once the lookback window holds `min_requests_for_rates` (50) `/v1/predict*` requests: with a
+handful of requests one rejected input is already far over 0.5% (2 of 7 failed the 2026-10-02 run).
+Below that the summary's `service.enough_requests` is `false` and the rates are still reported. The
+cost: an API failing on a near-idle day does not trip `service`; `/health` is the check for that.
 
 ## Checking a drift alert
 

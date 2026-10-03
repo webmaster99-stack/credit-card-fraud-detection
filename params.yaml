@@ -131,6 +131,9 @@ monitoring:
   # Data quality and service thresholds (fractions of requests).
   max_invalid_fraction: 0.005
   max_error_rate: 0.01
+  # Minimum `/v1/predict*` requests in the lookback window before those two rates can alert:
+  # below it one bad request is already far over either threshold (2 of 7 is 28.57%).
+  min_requests_for_rates: 50
   # Performance: alert when recall on labelled predictions drops more than this vs the test recall.
   recall_drop_points: 0.10
   min_labels_for_performance: 30

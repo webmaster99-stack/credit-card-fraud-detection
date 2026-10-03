@@ -136,12 +136,16 @@ def build_summary(
         perf=perf,
         invalid_fraction=requests["invalid_fraction"],
         error_rate=requests["error_rate"],
+        n_requests=requests["requests"],
         cfg=cfg,
     )
     return {
         "generated_for_days": int(cfg["lookback_days"]),
         "n_predictions": len(predictions),
-        "service": requests,
+        "service": {
+            **requests,
+            "enough_requests": requests["requests"] >= int(cfg["min_requests_for_rates"]),
+        },
         "daily": daily,
         "performance": perf,
         "baselines": stats,

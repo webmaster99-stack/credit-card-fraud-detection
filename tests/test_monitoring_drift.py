@@ -93,7 +93,7 @@ def _day(n: int, drifted: int, outside: bool = False) -> dict:
 
 def test_alerts_need_three_consecutive_drift_days() -> None:
     quiet = {"alert": False}
-    kw = {"perf": quiet, "invalid_fraction": 0.0, "error_rate": 0.0, "cfg": CFG}
+    kw = {"perf": quiet, "invalid_fraction": 0.0, "error_rate": 0.0, "n_requests": 0, "cfg": CFG}
     n = int(CFG["min_rows_per_day"])
     two = build_alerts(daily=[_day(n, 0), _day(n, 2), _day(n, 2)], **kw)
     three = build_alerts(daily=[_day(n, 2), _day(n, 2), _day(n, 2)], **kw)
@@ -108,9 +108,20 @@ def test_alerts_for_service_quality_and_flag_rate() -> None:
         perf={"alert": False},
         invalid_fraction=0.02,
         error_rate=0.05,
+        n_requests=int(CFG["min_requests_for_rates"]),
         cfg=CFG,
     )
     assert {a["layer"] for a in alerts} == {"service", "data_quality", "prediction_drift"}
+
+
+def test_request_rates_need_enough_requests_to_alert() -> None:
+    # The 2026-10-02 false alarm: 2 rejected requests out of 7 read as 28.57% invalid.
+    kw = {"daily": [], "perf": {"alert": False}, "invalid_fraction": 2 / 7, "cfg": CFG}
+    floor = int(CFG["min_requests_for_rates"])
+    assert build_alerts(error_rate=1 / 7, n_requests=7, **kw) == []
+    assert build_alerts(error_rate=1 / 7, n_requests=floor - 1, **kw) == []
+    at_floor = build_alerts(error_rate=1 / 7, n_requests=floor, **kw)
+    assert {a["layer"] for a in at_floor} == {"service", "data_quality"}
 
 
 def test_thin_days_never_alert() -> None:
@@ -120,6 +131,7 @@ def test_thin_days_never_alert() -> None:
             perf={},
             invalid_fraction=0.0,
             error_rate=None,
+            n_requests=0,
             cfg=CFG,
         )
         == []
